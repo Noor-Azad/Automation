@@ -48,6 +48,13 @@ public abstract class BaseTest
     [TearDown]
     public async Task DisposeAsync()
     {
+        // NUnit still invokes TearDown when SetUp fails. In that case the
+        // browser context was never created, so there is nothing to dispose.
+        if (Context is null)
+        {
+            return;
+        }
+
         if (CaptureTrace)
         {
             var tracePath = ArtifactPaths.Trace(_testScopeName);

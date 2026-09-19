@@ -1,21 +1,23 @@
-name: WebKit Smoke
+name: OTP Security Checks
 
 on:
-  pull_request:
-    branches: [Test-Main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: tedile-production-otp-security
+  cancel-in-progress: false
+
 jobs:
-  webkit-smoke:
+  otp-security:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     env:
       TEDILE_BASE_URL: https://tedile.in
-      PLAYWRIGHT_BROWSER: webkit
+      PLAYWRIGHT_BROWSER: chromium
       PLAYWRIGHT_HEADLESS: true
       PLAYWRIGHT_TRACE: true
       PLAYWRIGHT_VIDEO: false
@@ -37,18 +39,18 @@ jobs:
       - name: Build
         run: dotnet build Tedile.Automation.sln --configuration Release --no-restore
 
-      - name: Install Playwright WebKit
+      - name: Install Playwright Chromium
         shell: pwsh
-        run: tests/Tedile.Automation.Tests/bin/Release/net8.0/playwright.ps1 install --with-deps webkit
+        run: tests/Tedile.Automation.Tests/bin/Release/net8.0/playwright.ps1 install --with-deps chromium
 
-      - name: Run WebKit smoke tests
-        run: dotnet test Tedile.Automation.sln --configuration Release --no-build --filter "TestCategory=WebKitSmoke&TestCategory!=OtpRateLimited" --logger "trx;LogFileName=webkit-smoke.trx" --results-directory TestResults
+      - name: Run OTP rate-limited security tests
+        run: dotnet test Tedile.Automation.sln --configuration Release --no-build --filter "TestCategory=OtpRateLimited" --logger "trx;LogFileName=otp-security.trx" --results-directory TestResults
 
-      - name: Upload WebKit smoke artifacts
+      - name: Upload OTP security results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: webkit-smoke-results-${{ github.run_number }}
+          name: otp-security-results-${{ github.run_number }}
           path: |
             TestResults/**
             artifacts/**

@@ -42,7 +42,7 @@ jobs:
         run: tests/Tedile.Automation.Tests/bin/Release/net8.0/playwright.ps1 install --with-deps firefox
 
       - name: Run Firefox smoke tests
-        run: dotnet test Tedile.Automation.sln --configuration Release --no-build --filter "TestCategory=FirefoxSmoke" --logger "trx;LogFileName=firefox-smoke.trx" --results-directory TestResults
+        run: dotnet test Tedile.Automation.sln --configuration Release --no-build --filter "TestCategory=FirefoxSmoke&TestCategory!=OtpRateLimited" --logger "trx;LogFileName=firefox-smoke.trx" --results-directory TestResults
 
       - name: Upload Firefox smoke artifacts
         if: always()

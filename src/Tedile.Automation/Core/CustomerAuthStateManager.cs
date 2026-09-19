@@ -1,5 +1,5 @@
+using System.Text.RegularExpressions;
 using Microsoft.Playwright;
-using Tedile.Automation.Pages;
 
 namespace Tedile.Automation.Core;
 
@@ -31,16 +31,76 @@ public static class CustomerAuthStateManager
 
             await fixture.InitializeAsync();
             await using var context = await fixture.CreateContextAsync();
-            var page = await context.NewPageAsync();
 
-            var welcome = new WelcomePage(page);
-            var otp = new OtpPage(page);
+            // Build the authenticated storage state through Playwright's
+            // request client attached to the browser context. This shares the
+            // context cookie jar but avoids engine-specific navigation/load
+            // races while bootstrapping Chromium, Firefox, and WebKit.
+            var bootstrapPage = await context.NewPageAsync();
+            var request = bootstrapPage.APIRequest;
 
-            await welcome.OpenAsync();
-            await welcome.RequestCustomerOtpAsync(fixture.Settings.CustomerPhone!);
-            await page.WaitForURLAsync("**/otp");
-            await otp.VerifyAsync(fixture.Settings.CustomerOtp!);
-            await page.WaitForURLAsync("**/customer/dashboard");
+            var welcomeResponse = await request.GetAsync("/");
+            if (!welcomeResponse.Ok)
+            {
+                throw new InvalidOperationException(
+                    $"Could not open Tedile welcome page while creating customer auth state. HTTP {welcomeResponse.Status}.");
+            }
+
+            var csrf = ExtractCsrfToken(await welcomeResponse.TextAsync());
+
+            var loginForm = request.CreateFormData();
+            loginForm.Set("csrf_token", csrf);
+            loginForm.Set("phone", fixture.Settings.CustomerPhone!);
+
+            var loginResponse = await request.PostAsync(
+                "/customer/login",
+                new APIRequestContextOptions
+                {
+                    Form = loginForm,
+                    MaxRedirects = 0
+                });
+
+            if (loginResponse.Status != 302)
+            {
+                throw new InvalidOperationException(
+                    $"Customer OTP challenge could not be started while creating auth state. HTTP {loginResponse.Status}.");
+            }
+
+            var otpPageResponse = await request.GetAsync("/otp");
+            if (!otpPageResponse.Ok)
+            {
+                throw new InvalidOperationException(
+                    $"OTP page could not be opened while creating auth state. HTTP {otpPageResponse.Status}.");
+            }
+
+            csrf = ExtractCsrfToken(await otpPageResponse.TextAsync());
+
+            var verifyForm = request.CreateFormData();
+            verifyForm.Set("csrf_token", csrf);
+            verifyForm.Set("otp", fixture.Settings.CustomerOtp!);
+
+            var verifyResponse = await request.PostAsync(
+                "/otp/verify",
+                new APIRequestContextOptions
+                {
+                    Form = verifyForm,
+                    MaxRedirects = 0
+                });
+
+            if (verifyResponse.Status != 302)
+            {
+                throw new InvalidOperationException(
+                    $"Review customer OTP verification failed while creating auth state. HTTP {verifyResponse.Status}.");
+            }
+
+            var sessionResponse = await request.GetAsync("/api/session");
+            var sessionBody = await sessionResponse.TextAsync();
+            if (sessionResponse.Status != 200 ||
+                !sessionBody.Contains("\"authenticated\":true", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Customer session was not authenticated after OTP verification. HTTP {sessionResponse.Status}.");
+            }
 
             var authFolder = Path.Combine(Path.GetTempPath(), "tedile-automation-auth");
             Directory.CreateDirectory(authFolder);
@@ -59,5 +119,33 @@ public static class CustomerAuthStateManager
         {
             Gate.Release();
         }
+    }
+
+    private static string ExtractCsrfToken(string html)
+    {
+        var options = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant;
+
+        // The welcome page exposes CSRF in a meta tag, while the OTP page
+        // exposes it as a hidden form field. Support both server-rendered forms.
+        var match = Regex.Match(
+            html,
+            """<meta\s+name=["']csrf-token["']\s+content=["']([^"']+)["']""",
+            options);
+
+        if (!match.Success)
+        {
+            match = Regex.Match(
+                html,
+                """<input[^>]*name=["']csrf_token["'][^>]*value=["']([^"']+)["'][^>]*>""",
+                options);
+        }
+
+        if (!match.Success)
+        {
+            throw new InvalidOperationException(
+                "Tedile did not return a CSRF token while creating customer auth state.");
+        }
+
+        return match.Groups[1].Value;
     }
 }
