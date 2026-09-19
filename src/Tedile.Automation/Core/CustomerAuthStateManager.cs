@@ -42,9 +42,11 @@ public static class CustomerAuthStateManager
             await otp.VerifyAsync(fixture.Settings.CustomerOtp!);
             await page.WaitForURLAsync("**/customer/dashboard");
 
-            var authFolder = Path.Combine(ArtifactPaths.EnsureRoot(), "auth");
+            var authFolder = Path.Combine(Path.GetTempPath(), "tedile-automation-auth");
             Directory.CreateDirectory(authFolder);
-            _storageStatePath = Path.Combine(authFolder, "customer-storage-state.json");
+            _storageStatePath = Path.Combine(
+                authFolder,
+                $"customer-storage-state-{Environment.ProcessId}.json");
 
             await context.StorageStateAsync(new BrowserContextStorageStateOptions
             {
