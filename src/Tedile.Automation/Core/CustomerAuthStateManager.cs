@@ -36,7 +36,8 @@ public static class CustomerAuthStateManager
             // request client attached to the browser context. This shares the
             // context cookie jar but avoids engine-specific navigation/load
             // races while bootstrapping Chromium, Firefox, and WebKit.
-            var request = context.APIRequest;
+            var bootstrapPage = await context.NewPageAsync();
+            var request = bootstrapPage.APIRequest;
 
             var welcomeResponse = await request.GetAsync("/");
             if (!welcomeResponse.Ok)
