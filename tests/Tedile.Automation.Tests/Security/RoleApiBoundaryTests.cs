@@ -1,15 +1,11 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Security;
 
-public sealed class RoleApiBoundaryTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class RoleApiBoundaryTests : AuthenticatedCustomerBaseTest
 {
-    public RoleApiBoundaryTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Customer_cannot_update_provider_operational_location()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -43,7 +39,7 @@ public sealed class RoleApiBoundaryTests : AuthenticatedCustomerBaseTest, IClass
         Assert.DoesNotContain("Traceback", body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Customer_cannot_access_provider_owner_dashboard_data()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -57,7 +53,7 @@ public sealed class RoleApiBoundaryTests : AuthenticatedCustomerBaseTest, IClass
         Assert.DoesNotContain("Operational location", body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Customer_contact_lookup_for_unknown_provider_returns_clean_not_found()
     {
         await Page.GotoAsync("/customer/dashboard");
