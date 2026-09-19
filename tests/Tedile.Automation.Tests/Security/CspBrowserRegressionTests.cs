@@ -5,6 +5,7 @@ using Tedile.Automation.Pages;
 namespace Tedile.Automation.Tests.Security;
 
 [Category("WebKitSmoke")]
+[Category("FirefoxSmoke")]
 public sealed class CspBrowserRegressionTests : AuthenticatedCustomerBaseTest
 {
     [Test, RequiresCustomerCredentials]
