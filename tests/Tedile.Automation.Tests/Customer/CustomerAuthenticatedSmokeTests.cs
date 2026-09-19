@@ -5,6 +5,7 @@ using static Microsoft.Playwright.Assertions;
 namespace Tedile.Automation.Tests.Customer;
 
 [Category("WebKitSmoke")]
+[Category("FirefoxSmoke")]
 public sealed class CustomerAuthenticatedSmokeTests : AuthenticatedCustomerBaseTest
 {
     [Test, RequiresCustomerCredentials]
