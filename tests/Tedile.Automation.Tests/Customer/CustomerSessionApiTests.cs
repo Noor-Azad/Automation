@@ -1,15 +1,11 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Customer;
 
-public sealed class CustomerSessionApiTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CustomerSessionApiTests : AuthenticatedCustomerBaseTest
 {
-    public CustomerSessionApiTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Authenticated_session_api_reports_customer_identity_without_private_fields()
     {
         await Page.GotoAsync("/customer/dashboard");
