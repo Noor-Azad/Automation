@@ -44,6 +44,12 @@ jobs:
       - name: Run WebKit smoke tests
         run: dotnet test Tedile.Automation.sln --configuration Release --no-build --filter "TestCategory=WebKitSmoke&TestCategory!=OtpRateLimited" --logger "trx;LogFileName=webkit-smoke.trx" --results-directory TestResults
 
+      - name: Generate authoritative HTML test report
+        if: always()
+        run: |
+          python3 scripts/generate_test_report.py TestResults --html TestResults/test-report.html --markdown TestResults/test-summary.md
+          cat TestResults/test-summary.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload WebKit smoke artifacts
         if: always()
         uses: actions/upload-artifact@v4
