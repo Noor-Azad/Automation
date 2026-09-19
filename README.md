@@ -141,7 +141,8 @@ The pipeline:
 2. builds the solution
 3. installs Playwright Chromium
 4. runs NUnit + Playwright tests
-5. uploads TRX results and Playwright trace artifacts
+5. generates an HTML report and GitHub job summary directly from the VSTest TRX result
+6. uploads TRX, HTML report, summary, and Playwright trace artifacts
 
 To enable authenticated customer tests in CI, add these **GitHub repository secrets**:
 
@@ -161,3 +162,13 @@ pwsh tests/Tedile.Automation.Tests/bin/Debug/net8.0/playwright.ps1 show-trace ar
 ```
 
 CI uploads the same trace files as downloadable GitHub Action artifacts.
+
+## Test reporting
+
+Every CI workflow generates:
+
+- `TestResults/test-report.html` — human-readable per-test report with pass/fail/skip, duration, and failure details
+- `TestResults/test-summary.md` — compact summary published directly in the GitHub Actions job summary
+- the original `.trx` file — the authoritative raw VSTest result
+
+The report generator reads the NUnit/VSTest `UnitTestResult outcome` values from the TRX file. A test can print `PASS` to the console or application log, but that message cannot change a failed NUnit assertion into a passed test in the report.
