@@ -5,6 +5,7 @@ using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Public;
 
+[Category("WebKitSmoke")]
 public sealed class WelcomeTests : BaseTest
 {
     [Test]
