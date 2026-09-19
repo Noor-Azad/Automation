@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: tedile-production-customer-auth
+  cancel-in-progress: false
+
 jobs:
   firefox-smoke:
     runs-on: ubuntu-latest
