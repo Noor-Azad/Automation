@@ -1,16 +1,12 @@
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
-using Xunit.Abstractions;
 using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Customer;
 
-public sealed class CustomerAuthenticationNegativeTests : BaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CustomerAuthenticationNegativeTests : BaseTest
 {
-    public CustomerAuthenticationNegativeTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Review_customer_invalid_otp_is_rejected()
     {
         var settings = Fixture.Settings;
@@ -29,7 +25,7 @@ public sealed class CustomerAuthenticationNegativeTests : BaseTest, IClassFixtur
         Assert.Contains("/otp", Page.Url, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Change_phone_discards_otp_challenge_and_returns_to_welcome()
     {
         var settings = Fixture.Settings;
@@ -52,7 +48,7 @@ public sealed class CustomerAuthenticationNegativeTests : BaseTest, IClassFixtur
         var otp = configuredOtp.Trim();
         if (otp.Length is < 4 or > 6 || !otp.All(char.IsDigit))
         {
-            throw new Xunit.Sdk.XunitException(
+            throw new AssertionException(
                 "TEDILE_E2E_CUSTOMER_OTP must be a 4- to 6-digit numeric value for the authentication tests.");
         }
 
