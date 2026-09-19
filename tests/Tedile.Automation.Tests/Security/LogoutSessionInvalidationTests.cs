@@ -56,20 +56,34 @@ public sealed class LogoutSessionInvalidationTests : AuthenticatedCustomerBaseTe
     }
 
     [RequiresCustomerCredentialsFact]
-    public async Task Logout_removes_active_session_cookie_from_browser_context()
+    public async Task Logout_replaces_authenticated_session_cookie_with_anonymous_session()
     {
         await Page.GotoAsync("/customer/dashboard");
 
         var before = await Context.CookiesAsync();
-        Assert.Contains(before, cookie =>
+        var authenticatedSession = before.FirstOrDefault(cookie =>
             string.Equals(cookie.Name, "session", StringComparison.Ordinal));
+
+        Assert.NotNull(authenticatedSession);
+        var authenticatedValue = authenticatedSession!.Value;
 
         var dashboard = new CustomerDashboardPage(Page);
         await dashboard.OpenAccountAsync();
         await dashboard.LogoutAsync();
 
         var after = await Context.CookiesAsync();
-        Assert.DoesNotContain(after, cookie =>
+        var anonymousSession = after.FirstOrDefault(cookie =>
             string.Equals(cookie.Name, "session", StringComparison.Ordinal));
+
+        // The login page renders a CSRF token, so Flask may immediately create
+        // a fresh anonymous session cookie after logout. The security property
+        // is that the authenticated cookie value is no longer reusable.
+        if (anonymousSession is not null)
+        {
+            Assert.NotEqual(authenticatedValue, anonymousSession.Value);
+        }
+
+        var sessionResponse = await Page.APIRequest.GetAsync("/api/session");
+        Assert.Equal(401, sessionResponse.Status);
     }
 }
