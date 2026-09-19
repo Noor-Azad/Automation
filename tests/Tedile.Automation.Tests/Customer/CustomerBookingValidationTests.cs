@@ -1,17 +1,13 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
-using Xunit.Abstractions;
 using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Customer;
 
-public sealed class CustomerBookingValidationTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CustomerBookingValidationTests : AuthenticatedCustomerBaseTest
 {
-    public CustomerBookingValidationTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Invalid_customer_name_is_blocked_before_booking_request_is_sent()
     {
         var profile = await OpenBookableProviderAsync();
@@ -34,7 +30,7 @@ public sealed class CustomerBookingValidationTests : AuthenticatedCustomerBaseTe
         Assert.Equal(0, bookingPosts);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Invalid_service_address_is_blocked_before_booking_request_is_sent()
     {
         var profile = await OpenBookableProviderAsync();
@@ -60,7 +56,7 @@ public sealed class CustomerBookingValidationTests : AuthenticatedCustomerBaseTe
         Assert.Equal(0, bookingPosts);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Invalid_pincode_is_blocked_before_booking_request_is_sent()
     {
         var profile = await OpenBookableProviderAsync();
@@ -123,7 +119,7 @@ public sealed class CustomerBookingValidationTests : AuthenticatedCustomerBaseTe
 
         if (string.IsNullOrWhiteSpace(providerCode))
         {
-            throw new Xunit.Sdk.XunitException(
+            throw new AssertionException(
                 "No non-offline provider is currently available in the production provider catalogue.");
         }
 
