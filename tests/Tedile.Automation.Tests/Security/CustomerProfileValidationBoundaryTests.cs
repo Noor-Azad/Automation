@@ -63,7 +63,7 @@ public sealed class CustomerProfileValidationBoundaryTests : AuthenticatedCustom
                 },
                 body: JSON.stringify({
                   name: 'Google Play Review',
-                  service_address: 'test'
+                  service_address: 'unknown'
                 })
               });
               return { status: response.status, body: await response.text() };
