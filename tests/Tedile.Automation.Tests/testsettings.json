@@ -1,0 +1,9 @@
+{
+  "baseUrl": "https://tedile.in",
+  "browser": "chromium",
+  "headless": true,
+  "slowMoMs": 0,
+  "timeoutMs": 30000,
+  "traceEnabled": true,
+  "videoEnabled": false
+}

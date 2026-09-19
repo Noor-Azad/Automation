@@ -1,0 +1,58 @@
+name: Playwright E2E
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      TEDILE_BASE_URL: https://tedile.in
+      PLAYWRIGHT_BROWSER: chromium
+      PLAYWRIGHT_HEADLESS: true
+      PLAYWRIGHT_TRACE: true
+      PLAYWRIGHT_VIDEO: false
+      TEDILE_E2E_CUSTOMER_PHONE: ${{ secrets.TEDILE_E2E_CUSTOMER_PHONE }}
+      TEDILE_E2E_CUSTOMER_OTP: ${{ secrets.TEDILE_E2E_CUSTOMER_OTP }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore Tedile.Automation.sln
+
+      - name: Build
+        run: dotnet build Tedile.Automation.sln --configuration Release --no-restore
+
+      - name: Install Playwright Chromium
+        shell: pwsh
+        run: tests/Tedile.Automation.Tests/bin/Release/net8.0/playwright.ps1 install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: dotnet test Tedile.Automation.sln --configuration Release --no-build --logger "trx;LogFileName=playwright.trx" --results-directory TestResults
+
+      - name: Upload test results and Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results-${{ github.run_number }}
+          path: |
+            TestResults/**
+            artifacts/**
+          if-no-files-found: ignore
+          retention-days: 14
