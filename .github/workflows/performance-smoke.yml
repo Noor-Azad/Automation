@@ -28,6 +28,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up k6
+        uses: grafana/setup-k6-action@v1
+
       - name: Run safe public k6 smoke
         uses: grafana/run-k6-action@v1
         with:
