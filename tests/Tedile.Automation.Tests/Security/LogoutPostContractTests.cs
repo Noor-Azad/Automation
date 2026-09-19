@@ -27,25 +27,34 @@ public sealed class LogoutPostContractTests : AuthenticatedCustomerBaseTest
             (before.GetProperty("body").GetString() ?? string.Empty).Replace(" ", string.Empty),
             StringComparison.OrdinalIgnoreCase);
 
-        // Submit a real browser POST without a CSRF field. Using fetch()
-        // with redirect:'manual' can leave the browser cookie jar unchanged
-        // for an opaque redirect, which does not exercise logout correctly.
-        var navigation = Page.WaitForURLAsync(
-            "**/",
-            new PageWaitForURLOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
-
+        // Build a real browser form without a CSRF field, then let
+        // Playwright click its submit button while waiting for navigation.
+        // This avoids the execution-context race caused by calling form.submit()
+        // from inside EvaluateAsync while the page is navigating away.
         await Page.EvaluateAsync(
             """
             () => {
               const form = document.createElement('form');
+              form.id = 'automation-logout-form';
               form.method = 'POST';
               form.action = '/logout';
+
+              const submit = document.createElement('button');
+              submit.type = 'submit';
+              submit.textContent = 'Automation logout';
+              form.appendChild(submit);
+
               document.body.appendChild(form);
-              form.submit();
             }
             """);
 
-        await navigation;
+        await Page.RunAndWaitForNavigationAsync(
+            async () => await Page.Locator("#automation-logout-form button[type='submit']").ClickAsync(),
+            new PageRunAndWaitForNavigationOptions
+            {
+                UrlString = "**/",
+                WaitUntil = WaitUntilState.DOMContentLoaded
+            });
 
         var after = await Page.EvaluateAsync<JsonElement>(
             """
