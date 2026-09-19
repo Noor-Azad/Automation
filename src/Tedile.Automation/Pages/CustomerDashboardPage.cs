@@ -75,6 +75,11 @@ public sealed class CustomerDashboardPage : BasePage
 
     public async Task LogoutAsync()
     {
-        await LogoutButton.ClickAsync();
+        await Page.RunAndWaitForNavigationAsync(
+            async () => await LogoutButton.ClickAsync(),
+            new PageRunAndWaitForNavigationOptions
+            {
+                WaitUntil = WaitUntilState.Load
+            });
     }
 }
