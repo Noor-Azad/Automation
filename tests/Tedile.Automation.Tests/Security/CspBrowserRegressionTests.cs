@@ -1,0 +1,54 @@
+using Microsoft.Playwright;
+using Tedile.Automation.Core;
+using Tedile.Automation.Pages;
+using Xunit.Abstractions;
+
+namespace Tedile.Automation.Tests.Security;
+
+public sealed class CspBrowserRegressionTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+{
+    public CspBrowserRegressionTests(PlaywrightFixture fixture, ITestOutputHelper output)
+        : base(fixture, output) { }
+
+    [RequiresCustomerCredentialsFact]
+    public async Task Customer_dashboard_has_no_CSP_script_execution_errors()
+    {
+        var violations = new List<string>();
+        Page.Console += (_, message) =>
+        {
+            if (message.Type == "error" &&
+                message.Text.Contains("Content Security Policy", StringComparison.OrdinalIgnoreCase))
+            {
+                violations.Add(message.Text);
+            }
+        };
+
+        await Page.GotoAsync("/customer/dashboard");
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+
+        Assert.Empty(violations);
+    }
+
+    [RequiresCustomerCredentialsFact]
+    public async Task Review_OTP_page_has_no_CSP_script_execution_errors()
+    {
+        var settings = Fixture.Settings;
+        var violations = new List<string>();
+        Page.Console += (_, message) =>
+        {
+            if (message.Type == "error" &&
+                message.Text.Contains("Content Security Policy", StringComparison.OrdinalIgnoreCase))
+            {
+                violations.Add(message.Text);
+            }
+        };
+
+        var welcome = new WelcomePage(Page);
+        await welcome.OpenAsync();
+        await welcome.RequestCustomerOtpAsync(settings.CustomerPhone!);
+        await Page.WaitForURLAsync("**/otp");
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+
+        Assert.Empty(violations);
+    }
+}
