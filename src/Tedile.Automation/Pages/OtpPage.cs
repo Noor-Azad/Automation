@@ -10,6 +10,7 @@ public sealed class OtpPage : BasePage
     public ILocator Code => Page.Locator("#otp-code");
     public ILocator VerifyButton => Page.GetByRole(AriaRole.Button, new() { Name = "Verify code" });
     public ILocator ChangePhoneButton => Page.GetByRole(AriaRole.Button, new() { Name = "Change phone number" });
+    public ILocator Error => Page.GetByRole(AriaRole.Alert);
 
     public async Task VerifyAsync(string otp)
     {

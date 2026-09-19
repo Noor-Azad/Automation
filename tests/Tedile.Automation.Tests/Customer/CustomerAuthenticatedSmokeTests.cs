@@ -40,7 +40,8 @@ public sealed class CustomerAuthenticatedSmokeTests : AuthenticatedCustomerBaseT
         await dashboard.OpenAccountAsync();
         await dashboard.LogoutAsync();
 
-        await Page.WaitForURLAsync("**/");
-        await Expect(Page.Locator("body")).Not.ToHaveClassAsync(new System.Text.RegularExpressions.Regex("customer-mobile-app"));
+        await Expect(Page.Locator("body")).Not.ToHaveClassAsync(
+            new System.Text.RegularExpressions.Regex("customer-mobile-app"));
+        await Expect(Page.Locator("[data-auth-form='customer-login']")).ToBeVisibleAsync();
     }
 }
