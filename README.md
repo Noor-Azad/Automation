@@ -133,7 +133,7 @@ Use the same dedicated review account already configured in Tedile. Do not use a
 
 ## GitHub Actions
 
-`.github/workflows/playwright.yml` runs on PRs and pushes to `main`.
+`.github/workflows/playwright.yml` runs on PRs and pushes to `Test-Main`.
 
 The pipeline:
 
