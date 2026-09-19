@@ -1,17 +1,13 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
-using Xunit.Abstractions;
 using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Customer;
 
-public sealed class CustomerProviderProfileTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CustomerProviderProfileTests : AuthenticatedCustomerBaseTest
 {
-    public CustomerProviderProfileTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Authenticated_customer_can_open_real_provider_profile()
     {
         var providerCode = await FindBookableProviderCodeAsync();
@@ -25,7 +21,7 @@ public sealed class CustomerProviderProfileTests : AuthenticatedCustomerBaseTest
         Assert.True(await profile.Services.CountAsync() > 0);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Booking_sheet_exposes_verified_readonly_phone_without_submitting_booking()
     {
         var providerCode = await FindBookableProviderCodeAsync();
@@ -75,7 +71,7 @@ public sealed class CustomerProviderProfileTests : AuthenticatedCustomerBaseTest
             }
         }
 
-        throw new Xunit.Sdk.XunitException(
+        throw new AssertionException(
             "No non-offline provider is currently available in the production provider catalogue.");
     }
 }

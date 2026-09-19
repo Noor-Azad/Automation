@@ -1,15 +1,11 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Security;
 
-public sealed class BookingOwnershipBoundaryTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class BookingOwnershipBoundaryTests : AuthenticatedCustomerBaseTest
 {
-    public BookingOwnershipBoundaryTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Unknown_booking_tracking_returns_clean_not_found()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -29,7 +25,7 @@ public sealed class BookingOwnershipBoundaryTests : AuthenticatedCustomerBaseTes
         Assert.DoesNotContain("Traceback", body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Unknown_booking_review_returns_clean_not_found_with_valid_csrf()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -66,7 +62,7 @@ public sealed class BookingOwnershipBoundaryTests : AuthenticatedCustomerBaseTes
         Assert.DoesNotContain("Traceback", body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Booking_review_without_csrf_is_rejected_before_any_mutation()
     {
         await Page.GotoAsync("/customer/dashboard");

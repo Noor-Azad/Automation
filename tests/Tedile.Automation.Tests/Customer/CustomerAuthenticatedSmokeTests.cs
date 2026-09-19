@@ -1,16 +1,12 @@
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
-using Xunit.Abstractions;
 using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Customer;
 
-public sealed class CustomerAuthenticatedSmokeTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CustomerAuthenticatedSmokeTests : AuthenticatedCustomerBaseTest
 {
-    public CustomerAuthenticatedSmokeTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Authenticated_customer_can_open_primary_sections()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -31,7 +27,7 @@ public sealed class CustomerAuthenticatedSmokeTests : AuthenticatedCustomerBaseT
         Assert.NotNull(await dashboard.ProfilePhone.GetAttributeAsync("readonly"));
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Authenticated_customer_can_logout()
     {
         await Page.GotoAsync("/customer/dashboard");

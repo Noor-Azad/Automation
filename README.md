@@ -1,6 +1,6 @@
 # Tedile Playwright Automation
 
-End-to-end automation for **Tedile** using **C# + Microsoft Playwright + xUnit**.
+End-to-end automation for **Tedile** using **C# + Microsoft Playwright + NUnit**.
 
 This repository intentionally replaces the previous Java/Selenium/TestNG proof-of-concept and its generated `target`, `test-output`, `allure-results`, and screenshot artifacts.
 
@@ -16,7 +16,7 @@ Tedile.Automation.sln
 │   ├── Core                 # Playwright browser fixture + artifacts
 │   ├── Models               # DTOs
 │   ├── Pages                # Page Objects
-│   ├── TestData             # MemberData / reusable test data
+│   ├── TestData             # TestCaseSource / reusable test data
 │   └── Utilities            # Logging helpers
 ├── tests/Tedile.Automation.Tests
 │   ├── Api                  # API validation
@@ -35,7 +35,7 @@ Tedile.Automation.sln
 - Page Object Model
 - central configuration with environment-variable overrides
 - reusable data provider
-- logging through xUnit output
+- logging through NUnit TestContext
 - API layer separate from UI pages
 - execution artifacts (Playwright trace, screenshots/video when enabled)
 - CI execution and downloadable test results
@@ -117,9 +117,9 @@ Tedile production does **not** get an insecure OTP bypass.
 
 The framework uses the existing dedicated Tedile review/test-account path:
 
-1. CI reads the review/test phone and fixed six-digit review OTP from GitHub Secrets.
+1. CI reads the review/test phone and configured review OTP from GitHub Secrets.
 2. The first authenticated test session completes the real Tedile OTP screen once.
-3. Playwright saves the authenticated browser storage state to `artifacts/auth/customer-storage-state.json`.
+3. Playwright saves the authenticated browser storage state outside CI artifacts in the OS temporary directory.
 4. Subsequent authenticated customer tests start from that saved state, so they do not repeat the OTP flow.
 
 This keeps production authentication intact while making the test suite fast and repeatable.
@@ -140,7 +140,7 @@ The pipeline:
 1. restores .NET dependencies
 2. builds the solution
 3. installs Playwright Chromium
-4. runs xUnit + Playwright tests
+4. runs NUnit + Playwright tests
 5. uploads TRX results and Playwright trace artifacts
 
 To enable authenticated customer tests in CI, add these **GitHub repository secrets**:

@@ -1,16 +1,12 @@
 using Microsoft.Playwright;
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Security;
 
-public sealed class CspBrowserRegressionTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CspBrowserRegressionTests : AuthenticatedCustomerBaseTest
 {
-    public CspBrowserRegressionTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Customer_dashboard_has_no_CSP_script_execution_errors()
     {
         var violations = new List<string>();
@@ -29,7 +25,7 @@ public sealed class CspBrowserRegressionTests : AuthenticatedCustomerBaseTest, I
         Assert.Empty(violations);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Review_OTP_page_has_no_CSP_script_execution_errors()
     {
         var settings = Fixture.Settings;

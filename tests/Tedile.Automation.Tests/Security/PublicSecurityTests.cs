@@ -1,27 +1,18 @@
 using Microsoft.Playwright;
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Security;
 
-public sealed class PublicSecurityTests : IClassFixture<PlaywrightFixture>
+public sealed class PublicSecurityTests : BaseTest
 {
-    private readonly PlaywrightFixture _fixture;
-    private readonly ITestOutputHelper _output;
 
-    public PublicSecurityTests(PlaywrightFixture fixture, ITestOutputHelper output)
-    {
-        _fixture = fixture;
-        _output = output;
-    }
-
-    [Fact]
+    [Test]
     public async Task Public_html_has_expected_security_headers()
     {
-        await _fixture.InitializeAsync();
-        await using var request = await _fixture.Playwright.APIRequest.NewContextAsync(new APIRequestNewContextOptions
+        await Fixture.InitializeAsync();
+        await using var request = await Fixture.Playwright.APIRequest.NewContextAsync(new APIRequestNewContextOptions
         {
-            BaseURL = _fixture.Settings.BaseUrl
+            BaseURL = Fixture.Settings.BaseUrl
         });
 
         var response = await request.GetAsync("/");
@@ -35,17 +26,16 @@ public sealed class PublicSecurityTests : IClassFixture<PlaywrightFixture>
         Assert.Contains("object-src 'none'", headers["content-security-policy"]);
         Assert.DoesNotContain("'unsafe-eval'", headers["content-security-policy"]);
 
-        _output.WriteLine(headers["content-security-policy"]);
+        Logger.Info(headers["content-security-policy"]);
     }
 
-    [Theory]
-    [InlineData("/customer/dashboard")]
-    [InlineData("/provider/dashboard")]
-    [InlineData("/admin/dashboard")]
+        [TestCase("/customer/dashboard")]
+    [TestCase("/provider/dashboard")]
+    [TestCase("/admin/dashboard")]
     public async Task Anonymous_user_cannot_open_protected_dashboards(string path)
     {
-        await _fixture.InitializeAsync();
-        await using var context = await _fixture.CreateContextAsync();
+        await Fixture.InitializeAsync();
+        await using var context = await Fixture.CreateContextAsync();
         var page = await context.NewPageAsync();
 
         await page.GotoAsync(path);
@@ -55,17 +45,16 @@ public sealed class PublicSecurityTests : IClassFixture<PlaywrightFixture>
             $"Expected protected route to redirect to login/welcome, but landed on {page.Url}");
     }
 
-    [Theory]
-    [InlineData("0 OR 1=1", "77.1025")]
-    [InlineData("25.0", "77.0' OR '1'='1")]
-    [InlineData("NaN", "77.1025")]
-    [InlineData("91", "77.1025")]
+        [TestCase("0 OR 1=1", "77.1025")]
+    [TestCase("25.0", "77.0' OR '1'='1")]
+    [TestCase("NaN", "77.1025")]
+    [TestCase("91", "77.1025")]
     public async Task Service_search_rejects_malformed_or_injection_like_coordinates(string latitude, string longitude)
     {
-        await _fixture.InitializeAsync();
-        await using var request = await _fixture.Playwright.APIRequest.NewContextAsync(new APIRequestNewContextOptions
+        await Fixture.InitializeAsync();
+        await using var request = await Fixture.Playwright.APIRequest.NewContextAsync(new APIRequestNewContextOptions
         {
-            BaseURL = _fixture.Settings.BaseUrl,
+            BaseURL = Fixture.Settings.BaseUrl,
             ExtraHTTPHeaders = new Dictionary<string, string> { ["Accept"] = "application/json" }
         });
 
@@ -79,13 +68,13 @@ public sealed class PublicSecurityTests : IClassFixture<PlaywrightFixture>
         Assert.DoesNotContain("psycopg", body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [Test]
     public async Task Session_api_does_not_expose_authenticated_data_to_anonymous_user()
     {
-        await _fixture.InitializeAsync();
-        await using var request = await _fixture.Playwright.APIRequest.NewContextAsync(new APIRequestNewContextOptions
+        await Fixture.InitializeAsync();
+        await using var request = await Fixture.Playwright.APIRequest.NewContextAsync(new APIRequestNewContextOptions
         {
-            BaseURL = _fixture.Settings.BaseUrl,
+            BaseURL = Fixture.Settings.BaseUrl,
             ExtraHTTPHeaders = new Dictionary<string, string> { ["Accept"] = "application/json" }
         });
 

@@ -1,15 +1,11 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Api;
 
-public sealed class ProviderSearchContractTests : BaseTest, IClassFixture<PlaywrightFixture>
+public sealed class ProviderSearchContractTests : BaseTest
 {
-    public ProviderSearchContractTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [Fact]
+    [Test]
     public async Task Provider_search_returns_consistent_paging_metadata()
     {
         var response = await Page.GotoAsync("/api/search/providers?limit=1&offset=0&sort=rating-high");
@@ -41,7 +37,7 @@ public sealed class ProviderSearchContractTests : BaseTest, IClassFixture<Playwr
         }
     }
 
-    [Fact]
+    [Test]
     public async Task Consecutive_provider_search_pages_do_not_repeat_same_provider()
     {
         var first = await FetchPageAsync(0);
@@ -56,7 +52,7 @@ public sealed class ProviderSearchContractTests : BaseTest, IClassFixture<Playwr
         Assert.DoesNotContain(second.ProviderIds[0], first.ProviderIds);
     }
 
-    [Fact]
+    [Test]
     public async Task Verified_only_search_never_returns_unverified_provider()
     {
         var response = await Page.GotoAsync("/api/search/providers?verified_only=true&limit=50&offset=0");
@@ -73,7 +69,7 @@ public sealed class ProviderSearchContractTests : BaseTest, IClassFixture<Playwr
         }
     }
 
-    [Fact]
+    [Test]
     public async Task Active_services_endpoint_returns_unique_service_slugs()
     {
         var response = await Page.GotoAsync("/api/services");

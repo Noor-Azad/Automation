@@ -1,17 +1,13 @@
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
 using Tedile.Automation.TestData;
-using Xunit.Abstractions;
 using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Public;
 
-public sealed class LegalTests : BaseTest, IClassFixture<PlaywrightFixture>
+public sealed class LegalTests : BaseTest
 {
-    public LegalTests(PlaywrightFixture fixture, ITestOutputHelper output) : base(fixture, output) { }
-
-    [Theory]
-    [MemberData(nameof(TestDataProvider.PublicLegalPages), MemberType = typeof(TestDataProvider))]
+        [TestCaseSource(typeof(TestDataProvider), nameof(TestDataProvider.PublicLegalPages))]
     public async Task Public_legal_pages_load_and_show_copyright(string path, string expectedHeading)
     {
         var legal = new LegalPage(Page);
@@ -21,7 +17,7 @@ public sealed class LegalTests : BaseTest, IClassFixture<PlaywrightFixture>
         await Expect(legal.Copyright).ToBeVisibleAsync();
     }
 
-    [Fact]
+    [Test]
     public async Task Provider_nda_print_button_calls_browser_print()
     {
         var legal = new LegalPage(Page);

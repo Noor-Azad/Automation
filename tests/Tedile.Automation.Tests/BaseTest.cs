@@ -1,25 +1,20 @@
 using Microsoft.Playwright;
 using Tedile.Automation.Core;
 using Tedile.Automation.Utilities;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests;
 
-public abstract class BaseTest : IAsyncLifetime
+internal static class NUnitTestRuntime
 {
-    private readonly string _testScopeName;
+    internal static PlaywrightFixture Fixture { get; } = new();
+}
 
-    protected BaseTest(PlaywrightFixture fixture, ITestOutputHelper output)
-    {
-        Fixture = fixture;
-        Output = output;
-        Logger = new TestLogger(output.WriteLine);
-        _testScopeName = GetType().Name;
-    }
+public abstract class BaseTest
+{
+    private string _testScopeName = string.Empty;
 
-    protected PlaywrightFixture Fixture { get; }
-    protected ITestOutputHelper Output { get; }
-    protected TestLogger Logger { get; }
+    protected PlaywrightFixture Fixture => NUnitTestRuntime.Fixture;
+    protected TestLogger Logger { get; private set; } = null!;
     protected IBrowserContext Context { get; private set; } = null!;
     protected IPage Page { get; private set; } = null!;
 
@@ -28,8 +23,11 @@ public abstract class BaseTest : IAsyncLifetime
     protected virtual Task<IBrowserContext> CreateContextAsync() =>
         Fixture.CreateContextAsync();
 
+    [SetUp]
     public async Task InitializeAsync()
     {
+        Logger = new TestLogger(TestContext.Progress.WriteLine);
+        _testScopeName = $"{GetType().Name}-{TestContext.CurrentContext.Test.Name}";
         Context = await CreateContextAsync();
 
         if (CaptureTrace)
@@ -47,6 +45,7 @@ public abstract class BaseTest : IAsyncLifetime
         Page.PageError += (_, message) => Logger.Warn($"page-error: {message}");
     }
 
+    [TearDown]
     public async Task DisposeAsync()
     {
         if (CaptureTrace)

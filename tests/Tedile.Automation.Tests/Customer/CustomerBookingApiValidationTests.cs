@@ -1,15 +1,11 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Customer;
 
-public sealed class CustomerBookingApiValidationTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CustomerBookingApiValidationTests : AuthenticatedCustomerBaseTest
 {
-    public CustomerBookingApiValidationTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Booking_api_rejects_invalid_customer_name()
     {
         var result = await PostBookingAsync(new Dictionary<string, string>
@@ -26,7 +22,7 @@ public sealed class CustomerBookingApiValidationTests : AuthenticatedCustomerBas
         Assert.Contains("valid name", result.Body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Booking_api_rejects_invalid_structured_address()
     {
         var result = await PostBookingAsync(new Dictionary<string, string>
@@ -43,7 +39,7 @@ public sealed class CustomerBookingApiValidationTests : AuthenticatedCustomerBas
         Assert.Contains("service address", result.Body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Booking_api_rejects_incomplete_coordinate_pair()
     {
         var result = await PostBookingAsync(new Dictionary<string, string>
@@ -61,7 +57,7 @@ public sealed class CustomerBookingApiValidationTests : AuthenticatedCustomerBas
         Assert.Contains("provided together", result.Body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Booking_api_rejects_non_finite_coordinates()
     {
         var result = await PostBookingAsync(new Dictionary<string, string>
@@ -80,7 +76,7 @@ public sealed class CustomerBookingApiValidationTests : AuthenticatedCustomerBas
         Assert.Contains("Invalid customer location coordinates", result.Body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Booking_api_rejects_oversized_notes_before_provider_lookup()
     {
         var result = await PostBookingAsync(new Dictionary<string, string>

@@ -1,15 +1,11 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Security;
 
-public sealed class AuthenticatedCustomerSecurityTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class AuthenticatedCustomerSecurityTests : AuthenticatedCustomerBaseTest
 {
-    public AuthenticatedCustomerSecurityTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Customer_profile_get_does_not_expose_private_identity_fields()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -36,7 +32,7 @@ public sealed class AuthenticatedCustomerSecurityTests : AuthenticatedCustomerBa
         Assert.DoesNotContain("otp", lower);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Profile_update_without_csrf_is_rejected_and_does_not_change_name()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -62,7 +58,7 @@ public sealed class AuthenticatedCustomerSecurityTests : AuthenticatedCustomerBa
         Assert.Equal(before, after);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Customer_cannot_change_phone_through_profile_endpoint()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -89,7 +85,7 @@ public sealed class AuthenticatedCustomerSecurityTests : AuthenticatedCustomerBa
         Assert.Contains("Phone number cannot be changed here.", body, StringComparison.Ordinal);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Provider_directions_are_denied_outside_active_booking_journey()
     {
         await Page.GotoAsync("/customer/dashboard");
