@@ -1,16 +1,13 @@
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
 using Tedile.Automation.TestData;
-using Xunit.Abstractions;
 using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Public;
 
-public sealed class WelcomeTests : BaseTest, IClassFixture<PlaywrightFixture>
+public sealed class WelcomeTests : BaseTest
 {
-    public WelcomeTests(PlaywrightFixture fixture, ITestOutputHelper output) : base(fixture, output) { }
-
-    [Fact]
+    [Test]
     public async Task Welcome_page_loads_with_customer_login_selected()
     {
         var welcome = new WelcomePage(Page);
@@ -21,7 +18,7 @@ public sealed class WelcomeTests : BaseTest, IClassFixture<PlaywrightFixture>
         await Expect(welcome.ProviderForm).ToBeHiddenAsync();
     }
 
-    [Fact]
+    [Test]
     public async Task Persona_toggle_switches_between_customer_and_provider_forms()
     {
         var welcome = new WelcomePage(Page);
@@ -35,8 +32,7 @@ public sealed class WelcomeTests : BaseTest, IClassFixture<PlaywrightFixture>
         await Expect(welcome.CustomerForm).ToBeVisibleAsync();
     }
 
-    [Theory]
-    [MemberData(nameof(TestDataProvider.InvalidCustomerPhones), MemberType = typeof(TestDataProvider))]
+        [TestCaseSource(typeof(TestDataProvider), nameof(TestDataProvider.InvalidCustomerPhones))]
     public async Task Invalid_customer_phone_is_rejected_without_entering_otp_flow(string phone)
     {
         var welcome = new WelcomePage(Page);
@@ -47,7 +43,7 @@ public sealed class WelcomeTests : BaseTest, IClassFixture<PlaywrightFixture>
         Assert.DoesNotContain("/otp", Page.Url, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [Test]
     public async Task Alphabetic_phone_input_is_sanitized_and_native_required_validation_blocks_submit()
     {
         var welcome = new WelcomePage(Page);
@@ -60,7 +56,7 @@ public sealed class WelcomeTests : BaseTest, IClassFixture<PlaywrightFixture>
         Assert.DoesNotContain("/otp", Page.Url, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Fact]
+    [Test]
     public async Task Terms_and_privacy_links_point_to_public_legal_pages()
     {
         var welcome = new WelcomePage(Page);
