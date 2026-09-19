@@ -7,6 +7,9 @@ public static class NUnitAssert
     public static void Equal<T>(T expected, T actual, string? message = null) =>
         NUnit.Framework.Assert.That(actual, Is.EqualTo(expected), message);
 
+    public static void NotEqual<T>(T notExpected, T actual, string? message = null) =>
+        NUnit.Framework.Assert.That(actual, Is.Not.EqualTo(notExpected), message);
+
     public static void True(bool condition, string? message = null) =>
         NUnit.Framework.Assert.That(condition, Is.True, message);
 
@@ -45,6 +48,12 @@ public static class NUnitAssert
 
     public static void Contains<T>(IEnumerable<T> values, Predicate<T> predicate) =>
         NUnit.Framework.Assert.That(values.Any(value => predicate(value)), Is.True);
+
+    public static void Contains<T>(T expected, IEnumerable<T> values) =>
+        NUnit.Framework.Assert.That(values, Does.Contain(expected));
+
+    public static void DoesNotContain<T>(T expected, IEnumerable<T> values) =>
+        NUnit.Framework.Assert.That(values, Does.Not.Contain(expected));
 
     public static void DoesNotContain<T>(IEnumerable<T> values, Predicate<T> predicate) =>
         NUnit.Framework.Assert.That(values.Any(value => predicate(value)), Is.False);
