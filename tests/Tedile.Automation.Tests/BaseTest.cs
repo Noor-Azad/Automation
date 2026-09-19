@@ -23,6 +23,8 @@ public abstract class BaseTest : IAsyncLifetime
     protected IBrowserContext Context { get; private set; } = null!;
     protected IPage Page { get; private set; } = null!;
 
+    protected virtual bool CaptureTrace => Fixture.Settings.TraceEnabled;
+
     protected virtual Task<IBrowserContext> CreateContextAsync() =>
         Fixture.CreateContextAsync();
 
@@ -30,7 +32,7 @@ public abstract class BaseTest : IAsyncLifetime
     {
         Context = await CreateContextAsync();
 
-        if (Fixture.Settings.TraceEnabled)
+        if (CaptureTrace)
         {
             await Context.Tracing.StartAsync(new TracingStartOptions
             {
@@ -47,7 +49,7 @@ public abstract class BaseTest : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        if (Fixture.Settings.TraceEnabled)
+        if (CaptureTrace)
         {
             var tracePath = ArtifactPaths.Trace(_testScopeName);
             await Context.Tracing.StopAsync(new TracingStopOptions { Path = tracePath });
