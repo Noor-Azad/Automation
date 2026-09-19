@@ -27,7 +27,7 @@ public sealed class CspBrowserRegressionTests : AuthenticatedCustomerBaseTest
         Assert.Empty(violations);
     }
 
-    [Test, RequiresCustomerCredentials]
+    [Test, RequiresCustomerCredentials, Category("OtpRateLimited")]
     public async Task Review_OTP_page_has_no_CSP_script_execution_errors()
     {
         var settings = Fixture.Settings;
