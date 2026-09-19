@@ -40,7 +40,7 @@ public sealed class PlaywrightFixture : IDisposable, IAsyncDisposable
         });
     }
 
-    public async Task<IBrowserContext> CreateContextAsync()
+    public async Task<IBrowserContext> CreateContextAsync(string? storageStatePath = null)
     {
         await InitializeAsync();
 
@@ -51,7 +51,8 @@ public sealed class PlaywrightFixture : IDisposable, IAsyncDisposable
             Locale = "en-IN",
             TimezoneId = "Asia/Kolkata",
             IgnoreHTTPSErrors = false,
-            ViewportSize = new ViewportSize { Width = 1440, Height = 1000 }
+            ViewportSize = new ViewportSize { Width = 1440, Height = 1000 },
+            StorageStatePath = storageStatePath
         };
 
         if (Settings.VideoEnabled)
