@@ -1,15 +1,11 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Security;
 
-public sealed class SearchApiRobustnessTests : BaseTest, IClassFixture<PlaywrightFixture>
+public sealed class SearchApiRobustnessTests : BaseTest
 {
-    public SearchApiRobustnessTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [Fact]
+    [Test]
     public async Task Provider_search_sql_like_keyword_is_safely_handled_or_blocked_at_edge()
     {
         var response = await Page.GotoAsync("/api/search/providers?keyword=%27%20OR%201%3D1--&limit=10&offset=0");
@@ -33,7 +29,7 @@ public sealed class SearchApiRobustnessTests : BaseTest, IClassFixture<Playwrigh
         Assert.Equal(JsonValueKind.Array, providers.ValueKind);
     }
 
-    [Fact]
+    [Test]
     public async Task Provider_search_xss_like_keyword_is_safely_handled_or_blocked_at_edge()
     {
         var response = await Page.GotoAsync("/api/search/providers?keyword=%3Cscript%3Ealert(1)%3C%2Fscript%3E&limit=10&offset=0");
@@ -54,16 +50,15 @@ public sealed class SearchApiRobustnessTests : BaseTest, IClassFixture<Playwrigh
         Assert.DoesNotContain("<script>", body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [Theory]
-    [InlineData("limit=0")]
-    [InlineData("limit=51")]
-    [InlineData("limit=abc")]
-    [InlineData("offset=-1")]
-    [InlineData("offset=abc")]
-    [InlineData("radius=-1")]
-    [InlineData("min_price=100&max_price=10")]
-    [InlineData("latitude=91&longitude=88")]
-    [InlineData("latitude=25")]
+        [TestCase("limit=0")]
+    [TestCase("limit=51")]
+    [TestCase("limit=abc")]
+    [TestCase("offset=-1")]
+    [TestCase("offset=abc")]
+    [TestCase("radius=-1")]
+    [TestCase("min_price=100&max_price=10")]
+    [TestCase("latitude=91&longitude=88")]
+    [TestCase("latitude=25")]
     public async Task Provider_search_rejects_invalid_query_boundaries(string query)
     {
         var response = await Page.GotoAsync($"/api/search/providers?{query}");
@@ -75,7 +70,7 @@ public sealed class SearchApiRobustnessTests : BaseTest, IClassFixture<Playwrigh
         Assert.True(json.RootElement.TryGetProperty("error", out _));
     }
 
-    [Fact]
+    [Test]
     public async Task Provider_search_rejects_non_finite_coordinates()
     {
         var response = await Page.GotoAsync("/api/search/providers?latitude=NaN&longitude=88");
