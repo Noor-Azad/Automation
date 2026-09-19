@@ -4,6 +4,7 @@ using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Customer;
 
+[Category("OtpRateLimited")]
 public sealed class CustomerAuthenticationTests : BaseTest
 {
     [Test, RequiresCustomerCredentials]
