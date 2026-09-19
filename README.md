@@ -111,6 +111,26 @@ Defaults are in `tests/Tedile.Automation.Tests/testsettings.json` and can be ove
 
 Never commit real OTPs, passwords, private keys or production secrets.
 
+## OTP strategy for automation
+
+Tedile production does **not** get an insecure OTP bypass.
+
+The framework uses the existing dedicated Tedile review/test-account path:
+
+1. CI reads the review/test phone and fixed six-digit review OTP from GitHub Secrets.
+2. The first authenticated test session completes the real Tedile OTP screen once.
+3. Playwright saves the authenticated browser storage state to `artifacts/auth/customer-storage-state.json`.
+4. Subsequent authenticated customer tests start from that saved state, so they do not repeat the OTP flow.
+
+This keeps production authentication intact while making the test suite fast and repeatable.
+
+The two CI secrets are:
+
+- `TEDILE_E2E_CUSTOMER_PHONE`
+- `TEDILE_E2E_CUSTOMER_OTP`
+
+Use the same dedicated review account already configured in Tedile. Do not use a personal customer number and do not commit the values.
+
 ## GitHub Actions
 
 `.github/workflows/playwright.yml` runs on PRs and pushes to `main`.
