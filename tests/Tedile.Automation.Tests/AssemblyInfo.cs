@@ -1,3 +1,4 @@
-using Xunit;
+using NUnit.Framework;
 
-[assembly: CollectionBehavior(DisableTestParallelization = false, MaxParallelThreads = 4)]
+[assembly: LevelOfParallelism(4)]
+[assembly: Parallelizable(ParallelScope.Fixtures)]
