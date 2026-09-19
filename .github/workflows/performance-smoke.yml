@@ -1,0 +1,34 @@
+name: Performance Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      vus:
+        description: Virtual users
+        required: false
+        default: '2'
+      duration:
+        description: Duration (for example 20s or 1m)
+        required: false
+        default: '20s'
+
+permissions:
+  contents: read
+
+jobs:
+  k6-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TEDILE_BASE_URL: https://tedile.in
+      K6_VUS: ${{ inputs.vus }}
+      K6_DURATION: ${{ inputs.duration }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run safe public k6 smoke
+        uses: grafana/run-k6-action@v1
+        with:
+          path: performance/k6/public-smoke.js
