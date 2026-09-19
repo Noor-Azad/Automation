@@ -38,9 +38,15 @@ public static class CustomerAuthStateManager
 
             await welcome.OpenAsync();
             await welcome.RequestCustomerOtpAsync(fixture.Settings.CustomerPhone!);
-            await page.WaitForURLAsync("**/otp");
+            await page.WaitForURLAsync("**/otp", new PageWaitForURLOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded
+            });
             await otp.VerifyAsync(fixture.Settings.CustomerOtp!);
-            await page.WaitForURLAsync("**/customer/dashboard");
+            await page.WaitForURLAsync("**/customer/dashboard", new PageWaitForURLOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded
+            });
 
             var authFolder = Path.Combine(Path.GetTempPath(), "tedile-automation-auth");
             Directory.CreateDirectory(authFolder);
