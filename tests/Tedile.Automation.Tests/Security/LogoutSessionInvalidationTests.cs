@@ -1,16 +1,12 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Security;
 
-public sealed class LogoutSessionInvalidationTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class LogoutSessionInvalidationTests : AuthenticatedCustomerBaseTest
 {
-    public LogoutSessionInvalidationTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Logout_invalidates_authenticated_session_api_access()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -55,7 +51,7 @@ public sealed class LogoutSessionInvalidationTests : AuthenticatedCustomerBaseTe
         Assert.DoesNotContain("phone", body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Logout_replaces_authenticated_session_cookie_with_anonymous_session()
     {
         await Page.GotoAsync("/customer/dashboard");
