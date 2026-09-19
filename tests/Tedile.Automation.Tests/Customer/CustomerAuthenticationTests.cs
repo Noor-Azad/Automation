@@ -1,15 +1,12 @@
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
-using Xunit.Abstractions;
 using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Customer;
 
-public sealed class CustomerAuthenticationTests : BaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CustomerAuthenticationTests : BaseTest
 {
-    public CustomerAuthenticationTests(PlaywrightFixture fixture, ITestOutputHelper output) : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Review_customer_can_complete_otp_login_and_reach_dashboard()
     {
         var settings = Fixture.Settings;
