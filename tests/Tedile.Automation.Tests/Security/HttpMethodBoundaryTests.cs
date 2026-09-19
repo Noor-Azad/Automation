@@ -1,14 +1,10 @@
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Security;
 
-public sealed class HttpMethodBoundaryTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class HttpMethodBoundaryTests : AuthenticatedCustomerBaseTest
 {
-    public HttpMethodBoundaryTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Logout_endpoint_rejects_get_requests()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -20,7 +16,7 @@ public sealed class HttpMethodBoundaryTests : AuthenticatedCustomerBaseTest, ICl
         Assert.Contains("customer", await ReadSessionBodyAsync(), StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Booking_create_endpoint_rejects_get_requests()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -30,7 +26,7 @@ public sealed class HttpMethodBoundaryTests : AuthenticatedCustomerBaseTest, ICl
         Assert.Equal(405, response!.Status);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Booking_review_endpoint_rejects_get_requests()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -42,7 +38,7 @@ public sealed class HttpMethodBoundaryTests : AuthenticatedCustomerBaseTest, ICl
         Assert.Equal(405, response!.Status);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Booking_quote_endpoint_rejects_get_requests()
     {
         await Page.GotoAsync("/customer/dashboard");
