@@ -42,7 +42,7 @@ jobs:
         run: tests/Tedile.Automation.Tests/bin/Release/net8.0/playwright.ps1 install --with-deps webkit
 
       - name: Run WebKit smoke tests
-        run: dotnet test Tedile.Automation.sln --configuration Release --no-build --filter "TestCategory=WebKitSmoke" --logger "trx;LogFileName=webkit-smoke.trx" --results-directory TestResults
+        run: dotnet test Tedile.Automation.sln --configuration Release --no-build --filter "TestCategory=WebKitSmoke&TestCategory!=OtpRateLimited" --logger "trx;LogFileName=webkit-smoke.trx" --results-directory TestResults
 
       - name: Upload WebKit smoke artifacts
         if: always()
