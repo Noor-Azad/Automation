@@ -1,17 +1,13 @@
 using Microsoft.Playwright;
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
-using Xunit.Abstractions;
 using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Customer;
 
-public sealed class CustomerServiceDiscoveryTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CustomerServiceDiscoveryTests : AuthenticatedCustomerBaseTest
 {
-    public CustomerServiceDiscoveryTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Authenticated_customer_can_load_and_filter_service_catalogue()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -33,7 +29,7 @@ public sealed class CustomerServiceDiscoveryTests : AuthenticatedCustomerBaseTes
         await Expect(dashboard.ServiceCards.Filter(new() { HasText = firstName }).First).ToBeVisibleAsync();
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Selecting_a_service_calls_provider_search_without_error()
     {
         await Page.GotoAsync("/customer/dashboard");
