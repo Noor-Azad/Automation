@@ -2,9 +2,9 @@ name: Playwright E2E
 
 on:
   pull_request:
-    branches: [main]
+    branches: [Test-Main]
   push:
-    branches: [main]
+    branches: [Test-Main]
   workflow_dispatch:
 
 permissions:
