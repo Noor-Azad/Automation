@@ -12,6 +12,12 @@ public sealed class CustomerDashboardPage : BasePage
     public ILocator AccountScreen => Page.Locator("#screen-account");
     public ILocator ProfileEditScreen => Page.Locator("#screen-profile-edit");
     public ILocator NotificationsScreen => Page.Locator("#screen-notifications");
+    public ILocator ServiceResultsScreen => Page.Locator("#screen-service-results");
+    public ILocator ServiceFilter => Page.Locator("#service-filter");
+    public ILocator ServiceCards => Page.Locator("#service-groups [data-service]");
+    public ILocator ServiceSuggestions => Page.Locator("#service-suggestions [data-suggestion-service]");
+    public ILocator ProviderResults => Page.Locator("#provider-results");
+    public ILocator ResultsSubtitle => Page.Locator("#results-subtitle");
     public ILocator Greeting => Page.Locator("#customer-greeting");
     public ILocator BottomNav => Page.Locator("#customer-bottomnav");
     public ILocator LogoutButton => AccountScreen.Locator("form.logout-form button[type='submit']");
@@ -25,6 +31,21 @@ public sealed class CustomerDashboardPage : BasePage
     public async Task BackFromServicesAsync()
     {
         await ServicesScreen.Locator("[data-customer-back='home']").ClickAsync();
+    }
+
+    public async Task WaitForServiceCatalogueAsync()
+    {
+        await ServiceCards.First.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
+    }
+
+    public async Task FilterServicesAsync(string value)
+    {
+        await ServiceFilter.FillAsync(value);
+    }
+
+    public async Task SelectFirstServiceAsync()
+    {
+        await ServiceCards.First.ClickAsync();
     }
 
     public async Task OpenBookingsAsync()
