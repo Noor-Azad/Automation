@@ -50,10 +50,10 @@ public sealed class CustomerAuthenticationNegativeTests : BaseTest, IClassFixtur
     private static string BuildDifferentOtp(string configuredOtp)
     {
         var otp = configuredOtp.Trim();
-        if (otp.Length != 6 || !otp.All(char.IsDigit))
+        if (otp.Length is < 4 or > 6 || !otp.All(char.IsDigit))
         {
             throw new Xunit.Sdk.XunitException(
-                "TEDILE_E2E_CUSTOMER_OTP must be a 6-digit value for the review-account authentication tests.");
+                "TEDILE_E2E_CUSTOMER_OTP must be a 4- to 6-digit numeric value for the authentication tests.");
         }
 
         var chars = otp.ToCharArray();
