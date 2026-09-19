@@ -5,7 +5,7 @@ namespace Tedile.Automation.Tests.Security;
 
 public sealed class SensitiveResponseCacheTests : AuthenticatedCustomerBaseTest
 {
-    [Test, RequiresCustomerCredentials]
+    [RequiresCustomerCredentials]
     [TestCase("/customer/dashboard")]
     [TestCase("/api/session")]
     [TestCase("/customer/profile")]
