@@ -44,7 +44,7 @@ jobs:
         run: tests/Tedile.Automation.Tests/bin/Release/net8.0/playwright.ps1 install --with-deps chromium
 
       - name: Run Playwright tests
-        run: dotnet test Tedile.Automation.sln --configuration Release --no-build --logger "trx;LogFileName=playwright.trx" --results-directory TestResults
+        run: dotnet test Tedile.Automation.sln --configuration Release --no-build --filter "TestCategory!=OtpRateLimited" --logger "trx;LogFileName=playwright.trx" --results-directory TestResults
 
       - name: Upload test results and Playwright artifacts
         if: always()
