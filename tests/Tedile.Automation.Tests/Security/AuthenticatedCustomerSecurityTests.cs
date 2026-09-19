@@ -29,7 +29,7 @@ public sealed class AuthenticatedCustomerSecurityTests : AuthenticatedCustomerBa
         var body = result.GetProperty("body").GetString() ?? string.Empty;
         var lower = body.ToLowerInvariant();
 
-        Assert.Contains(""name"", lower);
+        Assert.Contains("\"name\"", lower);
         Assert.DoesNotContain("phone", lower);
         Assert.DoesNotContain("email", lower);
         Assert.DoesNotContain("password", lower);
