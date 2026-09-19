@@ -1,15 +1,11 @@
 using Microsoft.Playwright;
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Security;
 
-public sealed class SessionCookieSecurityTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class SessionCookieSecurityTests : AuthenticatedCustomerBaseTest
 {
-    public SessionCookieSecurityTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Authenticated_session_cookie_has_secure_flags()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -24,7 +20,7 @@ public sealed class SessionCookieSecurityTests : AuthenticatedCustomerBaseTest, 
         Assert.Equal(SameSiteAttribute.Lax, session.SameSite);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Session_cookie_is_scoped_to_tedile_host()
     {
         await Page.GotoAsync("/customer/dashboard");
