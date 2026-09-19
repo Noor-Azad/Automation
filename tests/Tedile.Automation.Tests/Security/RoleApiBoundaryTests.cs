@@ -1,3 +1,4 @@
+using Microsoft.Playwright;
 using System.Text.Json;
 using Tedile.Automation.Core;
 
@@ -8,7 +9,9 @@ public sealed class RoleApiBoundaryTests : AuthenticatedCustomerBaseTest
     [Test, RequiresCustomerCredentials]
     public async Task Customer_cannot_update_provider_operational_location()
     {
-        await Page.GotoAsync("/customer/dashboard");
+        await Page.GotoAsync(
+            "/customer/dashboard",
+            new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         var result = await Page.EvaluateAsync<JsonElement>(
             """
@@ -42,7 +45,9 @@ public sealed class RoleApiBoundaryTests : AuthenticatedCustomerBaseTest
     [Test, RequiresCustomerCredentials]
     public async Task Customer_cannot_access_provider_owner_dashboard_data()
     {
-        await Page.GotoAsync("/customer/dashboard");
+        await Page.GotoAsync(
+            "/customer/dashboard",
+            new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         var response = await Page.GotoAsync("/provider/dashboard");
         Assert.NotNull(response);
@@ -56,7 +61,9 @@ public sealed class RoleApiBoundaryTests : AuthenticatedCustomerBaseTest
     [Test, RequiresCustomerCredentials]
     public async Task Customer_contact_lookup_for_unknown_provider_returns_clean_not_found()
     {
-        await Page.GotoAsync("/customer/dashboard");
+        await Page.GotoAsync(
+            "/customer/dashboard",
+            new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
         var response = await Page.GotoAsync("/customer/providers/AUTOMATION-NOT-A-REAL-PROVIDER/contact");
         Assert.NotNull(response);
