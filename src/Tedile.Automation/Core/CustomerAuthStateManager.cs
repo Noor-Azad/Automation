@@ -123,10 +123,22 @@ public static class CustomerAuthStateManager
 
     private static string ExtractCsrfToken(string html)
     {
+        var options = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant;
+
+        // The welcome page exposes CSRF in a meta tag, while the OTP page
+        // exposes it as a hidden form field. Support both server-rendered forms.
         var match = Regex.Match(
             html,
             """<meta\s+name=["']csrf-token["']\s+content=["']([^"']+)["']""",
-            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+            options);
+
+        if (!match.Success)
+        {
+            match = Regex.Match(
+                html,
+                """<input[^>]*name=["']csrf_token["'][^>]*value=["']([^"']+)["'][^>]*>""",
+                options);
+        }
 
         if (!match.Success)
         {
