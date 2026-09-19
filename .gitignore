@@ -1,0 +1,26 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+
+# Playwright / test artifacts
+artifacts/
+playwright-report/
+test-results/
+TestResults/
+*.trx
+*.zip
+*.webm
+
+# Secrets / local overrides
+.env
+.env.*
+!.env.example
+appsettings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
