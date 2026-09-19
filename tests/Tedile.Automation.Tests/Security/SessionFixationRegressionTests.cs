@@ -4,7 +4,7 @@ namespace Tedile.Automation.Tests.Security;
 
 public sealed class SessionFixationRegressionTests : BaseTest
 {
-    [Test, RequiresCustomerCredentials]
+    [Test, RequiresCustomerCredentials, Category("OtpRateLimited")]
     public async Task Customer_login_rotates_anonymous_session_cookie()
     {
         await Context.ClearCookiesAsync();
