@@ -23,9 +23,12 @@ public abstract class BaseTest : IAsyncLifetime
     protected IBrowserContext Context { get; private set; } = null!;
     protected IPage Page { get; private set; } = null!;
 
+    protected virtual Task<IBrowserContext> CreateContextAsync() =>
+        Fixture.CreateContextAsync();
+
     public async Task InitializeAsync()
     {
-        Context = await Fixture.CreateContextAsync();
+        Context = await CreateContextAsync();
 
         if (Fixture.Settings.TraceEnabled)
         {
