@@ -15,6 +15,12 @@ public sealed class ProviderProfilePage : BasePage
     public ILocator BookingPanel => Page.Locator("#booking-panel");
     public ILocator BookingForm => Page.Locator("#booking-form");
     public ILocator PhoneField => BookingForm.Locator(".booking-phone-field input");
+    public ILocator CustomerName => BookingForm.Locator("input[name='customer_display_name']");
+    public ILocator AddressLine1 => BookingForm.Locator("input[name='address_line_1']");
+    public ILocator AddressLocality => BookingForm.Locator("input[name='address_locality']");
+    public ILocator AddressPincode => BookingForm.Locator("input[name='address_pincode']");
+    public ILocator NameError => BookingForm.Locator(".booking-name-error");
+    public ILocator AddressError => BookingForm.Locator(".booking-address-error");
     public ILocator ServiceSelect => BookingForm.Locator("#booking-service");
     public ILocator ScheduledAt => BookingForm.Locator("input[name='scheduled_at']");
     public ILocator SubmitButton => BookingForm.GetByRole(AriaRole.Button, new() { Name = "Send booking request" });
