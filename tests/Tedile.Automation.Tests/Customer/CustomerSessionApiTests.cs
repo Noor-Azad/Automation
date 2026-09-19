@@ -14,10 +14,11 @@ public sealed class CustomerSessionApiTests : AuthenticatedCustomerBaseTest, ICl
     {
         await Page.GotoAsync("/customer/dashboard");
 
-        var response = await Page.APIRequest.GetAsync("/api/session");
-        Assert.Equal(200, response.Status);
+        var response = await Page.GotoAsync("/api/session");
+        Assert.NotNull(response);
+        Assert.Equal(200, response!.Status);
 
-        var text = await response.TextAsync();
+        var text = await Page.Locator("body").InnerTextAsync();
         using var json = JsonDocument.Parse(text);
 
         Assert.True(json.RootElement.GetProperty("authenticated").GetBoolean());
