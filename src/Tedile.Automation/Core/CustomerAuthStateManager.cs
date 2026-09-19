@@ -48,15 +48,15 @@ public static class CustomerAuthStateManager
 
             var csrf = ExtractCsrfToken(await welcomeResponse.TextAsync());
 
+            var loginForm = request.CreateFormData();
+            loginForm.Set("csrf_token", csrf);
+            loginForm.Set("phone", fixture.Settings.CustomerPhone!);
+
             var loginResponse = await request.PostAsync(
                 "/customer/login",
                 new APIRequestContextOptions
                 {
-                    Form = new Dictionary<string, object>
-                    {
-                        ["csrf_token"] = csrf,
-                        ["phone"] = fixture.Settings.CustomerPhone!
-                    },
+                    Form = loginForm,
                     MaxRedirects = 0
                 });
 
@@ -75,15 +75,15 @@ public static class CustomerAuthStateManager
 
             csrf = ExtractCsrfToken(await otpPageResponse.TextAsync());
 
+            var verifyForm = request.CreateFormData();
+            verifyForm.Set("csrf_token", csrf);
+            verifyForm.Set("otp", fixture.Settings.CustomerOtp!);
+
             var verifyResponse = await request.PostAsync(
                 "/otp/verify",
                 new APIRequestContextOptions
                 {
-                    Form = new Dictionary<string, object>
-                    {
-                        ["csrf_token"] = csrf,
-                        ["otp"] = fixture.Settings.CustomerOtp!
-                    },
+                    Form = verifyForm,
                     MaxRedirects = 0
                 });
 
