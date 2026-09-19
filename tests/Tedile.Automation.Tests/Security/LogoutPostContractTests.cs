@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace Tedile.Automation.Tests.Security;
 
 public sealed class LogoutPostContractTests : AuthenticatedCustomerBaseTest
@@ -9,55 +7,31 @@ public sealed class LogoutPostContractTests : AuthenticatedCustomerBaseTest
     {
         await Page.GotoAsync("/customer/dashboard");
 
-        var before = await Page.EvaluateAsync<JsonElement>(
-            """
-            async () => {
-              const response = await fetch('/api/session', {
-                credentials: 'same-origin',
-                headers: { 'Accept': 'application/json' }
-              });
-              return { status: response.status, body: await response.text() };
-            }
-            """);
+        var before = await Page.APIRequest.GetAsync("/api/session");
+        Assert.Equal(200, before.Status);
 
-        Assert.Equal(200, before.GetProperty("status").GetInt32());
+        var beforeBody = await before.TextAsync();
         Assert.Contains(
             "\"authenticated\":true",
-            (before.GetProperty("body").GetString() ?? string.Empty).Replace(" ", string.Empty),
+            beforeBody.Replace(" ", string.Empty),
             StringComparison.OrdinalIgnoreCase);
 
-        var logout = await Page.EvaluateAsync<JsonElement>(
-            """
-            async () => {
-              const response = await fetch('/logout', {
-                method: 'POST',
-                credentials: 'same-origin',
-                redirect: 'manual'
-              });
-              return {
-                status: response.status,
-                location: response.headers.get('location') || ''
-              };
-            }
-            """);
+        // BrowserContext.APIRequest shares the browser context cookie jar.
+        // POST directly so we can verify the logout contract without depending
+        // on navigation timing or redirect handling in a browser engine.
+        var logout = await Page.APIRequest.PostAsync(
+            "/logout",
+            new Microsoft.Playwright.APIRequestContextOptions
+            {
+                MaxRedirects = 0
+            });
 
-        var status = logout.GetProperty("status").GetInt32();
-        Assert.True(status is 0 or 302 or 303);
+        Assert.Equal(302, logout.Status);
 
-        var after = await Page.EvaluateAsync<JsonElement>(
-            """
-            async () => {
-              const response = await fetch('/api/session', {
-                credentials: 'same-origin',
-                headers: { 'Accept': 'application/json' }
-              });
-              return { status: response.status, body: await response.text() };
-            }
-            """);
+        var after = await Page.APIRequest.GetAsync("/api/session");
+        Assert.Equal(401, after.Status);
 
-        Assert.Equal(401, after.GetProperty("status").GetInt32());
-
-        var body = after.GetProperty("body").GetString() ?? string.Empty;
+        var body = await after.TextAsync();
         Assert.DoesNotContain("phone", body, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("otp", body, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("password", body, StringComparison.OrdinalIgnoreCase);
@@ -68,9 +42,14 @@ public sealed class LogoutPostContractTests : AuthenticatedCustomerBaseTest
     {
         await Page.GotoAsync("/customer/dashboard");
 
-        var response = await Page.GotoAsync("/logout");
-        Assert.NotNull(response);
-        Assert.Equal(405, response!.Status);
+        var response = await Page.APIRequest.GetAsync(
+            "/logout",
+            new Microsoft.Playwright.APIRequestContextOptions
+            {
+                MaxRedirects = 0
+            });
+
+        Assert.Equal(405, response.Status);
 
         var session = await Page.APIRequest.GetAsync("/api/session");
         Assert.Equal(200, session.Status);
