@@ -9,6 +9,9 @@ public sealed class SensitiveResponseCacheTests : AuthenticatedCustomerBaseTest
     [TestCase("/customer/dashboard")]
     [TestCase("/api/session")]
     [TestCase("/customer/profile")]
+    [TestCase("/notifications")]
+    [TestCase("/customer/bookings/AUTOMATION-NOT-A-REAL-BOOKING/tracking")]
+    [TestCase("/customer/providers/AUTOMATION-NOT-A-REAL-PROVIDER/contact")]
     public async Task Authenticated_sensitive_get_responses_are_not_cacheable(string path)
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -28,7 +31,9 @@ public sealed class SensitiveResponseCacheTests : AuthenticatedCustomerBaseTest
             }
             """);
 
-        Assert.Equal(200, result.GetProperty("status").GetInt32());
+        var status = result.GetProperty("status").GetInt32();
+        Assert.True(status is 200 or 404);
+
         Assert.Contains(
             "no-store",
             result.GetProperty("cacheControl").GetString() ?? string.Empty,
