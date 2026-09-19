@@ -1,3 +1,4 @@
+using Microsoft.Playwright;
 using System.Text.Json;
 
 namespace Tedile.Automation.Tests.Security;
@@ -26,23 +27,25 @@ public sealed class LogoutPostContractTests : AuthenticatedCustomerBaseTest
             (before.GetProperty("body").GetString() ?? string.Empty).Replace(" ", string.Empty),
             StringComparison.OrdinalIgnoreCase);
 
-        var logout = await Page.EvaluateAsync<JsonElement>(
+        // Submit a real browser POST without a CSRF field. Using fetch()
+        // with redirect:'manual' can leave the browser cookie jar unchanged
+        // for an opaque redirect, which does not exercise logout correctly.
+        var navigation = Page.WaitForURLAsync(
+            "**/",
+            new PageWaitForURLOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
+
+        await Page.EvaluateAsync(
             """
-            async () => {
-              const response = await fetch('/logout', {
-                method: 'POST',
-                credentials: 'same-origin',
-                redirect: 'manual'
-              });
-              return {
-                status: response.status,
-                location: response.headers.get('location') || ''
-              };
+            () => {
+              const form = document.createElement('form');
+              form.method = 'POST';
+              form.action = '/logout';
+              document.body.appendChild(form);
+              form.submit();
             }
             """);
 
-        var status = logout.GetProperty("status").GetInt32();
-        Assert.True(status is 0 or 302 or 303);
+        await navigation;
 
         var after = await Page.EvaluateAsync<JsonElement>(
             """
