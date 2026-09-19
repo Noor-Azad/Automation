@@ -1,15 +1,12 @@
 using Tedile.Automation.Core;
 using Tedile.Automation.Pages;
-using Xunit.Abstractions;
 using static Microsoft.Playwright.Assertions;
 
 namespace Tedile.Automation.Tests.Customer;
 
-public sealed class CustomerNavigationTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CustomerNavigationTests : AuthenticatedCustomerBaseTest
 {
-    public CustomerNavigationTests(PlaywrightFixture fixture, ITestOutputHelper output) : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Customer_secondary_screen_back_buttons_are_deterministic()
     {
         await Page.GotoAsync("/customer/dashboard");
