@@ -8,9 +8,14 @@ public sealed class CustomerDashboardPage : BasePage
 
     public ILocator HomeScreen => Page.Locator("#screen-home");
     public ILocator ServicesScreen => Page.Locator("#screen-services");
+    public ILocator BookingsScreen => Page.Locator("#screen-bookings");
     public ILocator AccountScreen => Page.Locator("#screen-account");
     public ILocator ProfileEditScreen => Page.Locator("#screen-profile-edit");
+    public ILocator NotificationsScreen => Page.Locator("#screen-notifications");
     public ILocator Greeting => Page.Locator("#customer-greeting");
+    public ILocator BottomNav => Page.Locator("#customer-bottomnav");
+    public ILocator LogoutButton => AccountScreen.Locator("form.logout-form button[type='submit']");
+    public ILocator ProfilePhone => ProfileEditScreen.Locator("input[readonly]");
 
     public async Task OpenServicesFromHomeAsync()
     {
@@ -22,9 +27,19 @@ public sealed class CustomerDashboardPage : BasePage
         await ServicesScreen.Locator("[data-customer-back='home']").ClickAsync();
     }
 
+    public async Task OpenBookingsAsync()
+    {
+        await BottomNav.Locator("button[data-screen='bookings']").ClickAsync();
+    }
+
     public async Task OpenAccountAsync()
     {
-        await Page.Locator("#customer-bottomnav button[data-screen='account']").ClickAsync();
+        await BottomNav.Locator("button[data-screen='account']").ClickAsync();
+    }
+
+    public async Task OpenNotificationsFromAccountAsync()
+    {
+        await AccountScreen.Locator("button[data-screen='notifications']").ClickAsync();
     }
 
     public async Task OpenPersonalInformationAsync()
@@ -35,5 +50,10 @@ public sealed class CustomerDashboardPage : BasePage
     public async Task BackFromProfileEditAsync()
     {
         await ProfileEditScreen.Locator("[data-customer-back='account']").ClickAsync();
+    }
+
+    public async Task LogoutAsync()
+    {
+        await LogoutButton.ClickAsync();
     }
 }
