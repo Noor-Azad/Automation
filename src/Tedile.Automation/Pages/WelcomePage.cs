@@ -29,7 +29,27 @@ public sealed class WelcomePage : BasePage
     public async Task RequestCustomerOtpAsync(string phone)
     {
         await SelectCustomerAsync();
-        await CustomerPhone.FillAsync(phone);
+
+        // Tedile's visible login field accepts the 10-digit national number only.
+        // CI secrets may use the canonical +91XXXXXXXXXX form because Render's
+        // GOOGLE_PLAY_REVIEW_PHONE requires that form. Strip +91 before typing
+        // so welcome.js does not truncate the canonical number incorrectly.
+        var loginPhone = ToLoginPhone(phone);
+        await CustomerPhone.FillAsync(loginPhone);
         await CustomerSendCode.ClickAsync();
+    }
+
+    private static string ToLoginPhone(string phone)
+    {
+        var value = (phone ?? string.Empty).Trim();
+
+        if (value.StartsWith("+91", StringComparison.Ordinal) &&
+            value.Length == 13 &&
+            value[3..].All(char.IsDigit))
+        {
+            return value[3..];
+        }
+
+        return value;
     }
 }
