@@ -1,15 +1,11 @@
 using System.Text.Json;
 using Tedile.Automation.Core;
-using Xunit.Abstractions;
 
 namespace Tedile.Automation.Tests.Security;
 
-public sealed class CustomerAccessControlTests : AuthenticatedCustomerBaseTest, IClassFixture<PlaywrightFixture>
+public sealed class CustomerAccessControlTests : AuthenticatedCustomerBaseTest
 {
-    public CustomerAccessControlTests(PlaywrightFixture fixture, ITestOutputHelper output)
-        : base(fixture, output) { }
-
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Customer_cannot_open_provider_dashboard()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -19,7 +15,7 @@ public sealed class CustomerAccessControlTests : AuthenticatedCustomerBaseTest, 
         Assert.Equal(403, response!.Status);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Customer_cannot_open_admin_dashboard()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -29,7 +25,7 @@ public sealed class CustomerAccessControlTests : AuthenticatedCustomerBaseTest, 
         Assert.Equal(403, response!.Status);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Nonexistent_booking_cancel_is_hidden_as_not_found()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -55,7 +51,7 @@ public sealed class CustomerAccessControlTests : AuthenticatedCustomerBaseTest, 
         Assert.Contains("Booking not found", body, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Nonexistent_booking_quote_is_hidden_as_not_found()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -87,7 +83,7 @@ public sealed class CustomerAccessControlTests : AuthenticatedCustomerBaseTest, 
         Assert.Contains("Booking not found", responseBody, StringComparison.OrdinalIgnoreCase);
     }
 
-    [RequiresCustomerCredentialsFact]
+    [Test, RequiresCustomerCredentials]
     public async Task Authenticated_customer_dashboard_is_not_cacheable()
     {
         await Page.GotoAsync("/customer/dashboard");
