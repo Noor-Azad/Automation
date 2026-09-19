@@ -48,6 +48,19 @@ public sealed class WelcomeTests : BaseTest, IClassFixture<PlaywrightFixture>
     }
 
     [Fact]
+    public async Task Alphabetic_phone_input_is_sanitized_and_native_required_validation_blocks_submit()
+    {
+        var welcome = new WelcomePage(Page);
+        await welcome.OpenAsync();
+
+        await welcome.CustomerPhone.FillAsync("abcdefghij");
+
+        await Expect(welcome.CustomerPhone).ToHaveValueAsync(string.Empty);
+        Assert.False(await welcome.CustomerPhone.EvaluateAsync<bool>("el => el.checkValidity()"));
+        Assert.DoesNotContain("/otp", Page.Url, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task Terms_and_privacy_links_point_to_public_legal_pages()
     {
         var welcome = new WelcomePage(Page);
