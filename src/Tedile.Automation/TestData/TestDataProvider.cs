@@ -12,6 +12,6 @@ public static class TestDataProvider
     public static IEnumerable<object[]> InvalidCustomerPhones()
     {
         yield return new object[] { "12345" };
-        yield return new object[] { "abcdefghij" };
+        yield return new object[] { "0000000000" };
     }
 }
