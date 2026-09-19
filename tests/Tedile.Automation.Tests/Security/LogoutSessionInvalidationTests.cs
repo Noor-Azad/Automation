@@ -79,7 +79,17 @@ public sealed class LogoutSessionInvalidationTests : AuthenticatedCustomerBaseTe
             Assert.NotEqual(authenticatedValue, anonymousSession.Value);
         }
 
-        var sessionResponse = await Page.APIRequest.GetAsync("/api/session");
-        Assert.Equal(401, sessionResponse.Status);
+        var sessionResponse = await Page.EvaluateAsync<JsonElement>(
+            """
+            async () => {
+              const response = await fetch('/api/session', {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json' }
+              });
+              return { status: response.status, body: await response.text() };
+            }
+            """);
+
+        Assert.Equal(401, sessionResponse.GetProperty("status").GetInt32());
     }
 }
