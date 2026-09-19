@@ -28,7 +28,7 @@ public sealed class CustomerAuthenticatedSmokeTests : AuthenticatedCustomerBaseT
         await dashboard.OpenPersonalInformationAsync();
         await Expect(dashboard.ProfileEditScreen).ToHaveClassAsync(new System.Text.RegularExpressions.Regex("active"));
         await Expect(dashboard.ProfilePhone).ToBeVisibleAsync();
-        await Expect(dashboard.ProfilePhone).ToBeEditableAsync(new LocatorAssertionsToBeEditableOptions { Editable = false });
+        Assert.NotNull(await dashboard.ProfilePhone.GetAttributeAsync("readonly"));
     }
 
     [RequiresCustomerCredentialsFact]
