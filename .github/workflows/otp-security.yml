@@ -46,6 +46,12 @@ jobs:
       - name: Run OTP rate-limited security tests
         run: dotnet test Tedile.Automation.sln --configuration Release --no-build --filter "TestCategory=OtpRateLimited" --logger "trx;LogFileName=otp-security.trx" --results-directory TestResults
 
+      - name: Generate authoritative HTML test report
+        if: always()
+        run: |
+          python3 scripts/generate_test_report.py TestResults --html TestResults/test-report.html --markdown TestResults/test-summary.md
+          cat TestResults/test-summary.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload OTP security results
         if: always()
         uses: actions/upload-artifact@v4
