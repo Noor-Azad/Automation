@@ -1,8 +1,11 @@
+using Tedile.Automation.Core;
+
 namespace Tedile.Automation.Tests.Security;
 
 public sealed class LogoutPostContractTests : AuthenticatedCustomerBaseTest
 {
     [Test, RequiresCustomerCredentials]
+    [NonParallelizable]
     public async Task Logout_post_without_csrf_clears_only_the_current_session()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -20,16 +23,24 @@ public sealed class LogoutPostContractTests : AuthenticatedCustomerBaseTest
         // the redirect to be followed. Flask clears/replaces the session cookie
         // on the redirect response, and the browser cookie jar must process that
         // Set-Cookie before we verify the session state.
-        var logoutStatus = await Page.EvaluateAsync<int>(
-            """
-            async () => {
-              const response = await fetch('/logout', {
-                method: 'POST',
-                credentials: 'same-origin'
-              });
-              return response.status;
-            }
-            """);
+        int logoutStatus;
+        try
+        {
+            logoutStatus = await Page.EvaluateAsync<int>(
+                """
+                async () => {
+                  const response = await fetch('/logout', {
+                    method: 'POST',
+                    credentials: 'same-origin'
+                  });
+                  return response.status;
+                }
+                """);
+        }
+        finally
+        {
+            CustomerAuthStateManager.InvalidateCachedState();
+        }
 
         Assert.Equal(200, logoutStatus);
 

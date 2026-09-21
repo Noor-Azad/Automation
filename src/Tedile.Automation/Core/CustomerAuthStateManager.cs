@@ -8,6 +8,31 @@ public static class CustomerAuthStateManager
     private static readonly SemaphoreSlim Gate = new(1, 1);
     private static string? _storageStatePath;
 
+    public static void InvalidateCachedState()
+    {
+        var path = _storageStatePath;
+        _storageStatePath = null;
+
+        if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+        {
+            try
+            {
+                File.Delete(path);
+            }
+            catch (IOException)
+            {
+                // A context may still be closing. The stale path is no longer
+                // referenced, so the next authenticated setup will create a
+                // fresh storage-state file.
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Same reasoning as above: clearing the cached reference is
+                // sufficient to prevent reuse of a revoked auth session.
+            }
+        }
+    }
+
     public static async Task<string> GetOrCreateAsync(PlaywrightFixture fixture)
     {
         if (!fixture.Settings.HasCustomerCredentials)
