@@ -7,6 +7,7 @@ namespace Tedile.Automation.Tests.Security;
 public sealed class LogoutSessionInvalidationTests : AuthenticatedCustomerBaseTest
 {
     [Test, RequiresCustomerCredentials]
+    [NonParallelizable]
     public async Task Logout_invalidates_authenticated_session_api_access()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -30,7 +31,14 @@ public sealed class LogoutSessionInvalidationTests : AuthenticatedCustomerBaseTe
 
         var dashboard = new CustomerDashboardPage(Page);
         await dashboard.OpenAccountAsync();
-        await dashboard.LogoutAsync();
+        try
+        {
+            await dashboard.LogoutAsync();
+        }
+        finally
+        {
+            CustomerAuthStateManager.InvalidateCachedState();
+        }
 
         var after = await Page.EvaluateAsync<JsonElement>(
             """
@@ -52,6 +60,7 @@ public sealed class LogoutSessionInvalidationTests : AuthenticatedCustomerBaseTe
     }
 
     [Test, RequiresCustomerCredentials]
+    [NonParallelizable]
     public async Task Logout_replaces_authenticated_session_cookie_with_anonymous_session()
     {
         await Page.GotoAsync("/customer/dashboard");
@@ -65,7 +74,14 @@ public sealed class LogoutSessionInvalidationTests : AuthenticatedCustomerBaseTe
 
         var dashboard = new CustomerDashboardPage(Page);
         await dashboard.OpenAccountAsync();
-        await dashboard.LogoutAsync();
+        try
+        {
+            await dashboard.LogoutAsync();
+        }
+        finally
+        {
+            CustomerAuthStateManager.InvalidateCachedState();
+        }
 
         var after = await Context.CookiesAsync();
         var anonymousSession = after.FirstOrDefault(cookie =>
