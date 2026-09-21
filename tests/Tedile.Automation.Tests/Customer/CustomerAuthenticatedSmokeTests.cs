@@ -13,9 +13,9 @@ public sealed class CustomerAuthenticatedSmokeTests : AuthenticatedCustomerBaseT
     {
         await Page.GotoAsync("/customer/dashboard");
 
-        Assert.That(
+        Assert.Equal(
+            "/customer/dashboard",
             new Uri(Page.Url).AbsolutePath,
-            Is.EqualTo("/customer/dashboard"),
             $"Expected authenticated customer dashboard, but landed on '{Page.Url}'. " +
             "The shared authenticated session may have been invalidated by another test.");
 
