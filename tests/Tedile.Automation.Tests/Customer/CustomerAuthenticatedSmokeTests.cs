@@ -38,13 +38,21 @@ public sealed class CustomerAuthenticatedSmokeTests : AuthenticatedCustomerBaseT
 
     [Test, RequiresCustomerCredentials]
     [Category("SessionMutation")]
+    [NonParallelizable]
     public async Task Authenticated_customer_can_logout()
     {
         await Page.GotoAsync("/customer/dashboard");
         var dashboard = new CustomerDashboardPage(Page);
 
         await dashboard.OpenAccountAsync();
-        await dashboard.LogoutAsync();
+        try
+        {
+            await dashboard.LogoutAsync();
+        }
+        finally
+        {
+            CustomerAuthStateManager.InvalidateCachedState();
+        }
 
         await Expect(Page.Locator("body")).Not.ToHaveClassAsync(
             new System.Text.RegularExpressions.Regex("customer-mobile-app"));
