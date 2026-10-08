@@ -36,3 +36,28 @@ jobs:
           name: javascript-playwright-report
           path: javascript/playwright-report/
           retention-days: 14
+
+  javascript-cross-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [firefox, webkit]
+    defaults:
+      run:
+        working-directory: javascript
+    env:
+      TEDILE_BASE_URL: https://tedile.in
+      TEDILE_BROWSERS: ${{ matrix.browser }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install
+      - name: Install selected browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Run JavaScript public smoke on selected engine
+        run: npx playwright test tests/public --project=${{ matrix.browser }}
