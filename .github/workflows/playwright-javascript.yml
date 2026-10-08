@@ -23,6 +23,8 @@ jobs:
         run: npm install
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
+      - name: Verify JavaScript syntax
+        run: find . -name '*.js' -not -path './node_modules/*' -print0 | xargs -0 -n1 node --check
       - name: Run public JavaScript Playwright tests
         env:
           TEDILE_BASE_URL: https://tedile.in
