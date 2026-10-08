@@ -1,0 +1,43 @@
+name: Tedile UAT Authenticated Playwright
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tedile-uat-authenticated
+  cancel-in-progress: false
+jobs:
+  authenticated-uat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: uat
+    defaults:
+      run:
+        working-directory: javascript
+    env:
+      TEDILE_BASE_URL: https://tedile-uat.onrender.com
+      TEDILE_RUN_AUTHENTICATED: 'true'
+      TEDILE_E2E_CUSTOMER_PHONE: ${{ secrets.TEDILE_UAT_CUSTOMER_PHONE }}
+      TEDILE_E2E_CUSTOMER_OTP: ${{ secrets.TEDILE_UAT_CUSTOMER_OTP }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm UAT credentials configured
+        run: |
+          test -n "$TEDILE_E2E_CUSTOMER_PHONE" || { echo 'Missing TEDILE_UAT_CUSTOMER_PHONE secret'; exit 1; }
+          test -n "$TEDILE_E2E_CUSTOMER_OTP" || { echo 'Missing TEDILE_UAT_CUSTOMER_OTP secret'; exit 1; }
+      - name: Install JS dependencies
+        run: npm install
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Execute authenticated customer and security tests
+        run: npx playwright test --project=chromium --grep-invert '@manual'
+      - name: Upload failure reports without authenticated state
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uat-authenticated-report
+          path: javascript/playwright-report/
+          retention-days: 7
