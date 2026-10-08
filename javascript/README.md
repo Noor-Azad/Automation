@@ -1,24 +1,28 @@
 # Tedile Playwright JavaScript migration
 
-This folder introduces JavaScript Playwright Test alongside the existing C# Playwright + NUnit tests.
+The original C# + NUnit framework remains unchanged. JavaScript automation uses Playwright Test.
 
-## Start
+## Public tests (no credentials)
+
 ```bash
 cd javascript
 npm install
 npx playwright install chromium
-npm test
+npx playwright test
 ```
 
-Included so far: public welcome/legal, health/provider-search API, public security/anonymous access, and gated authenticated customer navigation/session checks.
+## Authenticated tests (dedicated test account only)
 
-## Authenticated tests (opt-in only)
+The authenticated project is deliberately **opt-in**. Set these variables in your shell or CI secret store, not the repository:
 
-Only use a dedicated approved test/review account. Set `TEDILE_E2E_CUSTOMER_PHONE` and `TEDILE_E2E_CUSTOMER_OTP` outside source control and set `TEDILE_RUN_AUTHENTICATED=true` to enable. These tests are serial within their files and create OTP requests, which are rate-limited. Never run them against an ordinary user or uncontrolled production account. They skip by default.
+- `TEDILE_E2E_CUSTOMER_PHONE`
+- `TEDILE_E2E_CUSTOMER_OTP`
+- `TEDILE_RUN_AUTHENTICATED=true`
 
-Example (with environment variables already set):
-```bash
-TEDILE_RUN_AUTHENTICATED=true npx playwright test tests/customer --workers=1
-```
+Run with `npx playwright test`. Playwright executes `tests/auth.setup.js` **once**, saves browser storage state to ignored `playwright/.auth/customer.json`, and uses separate isolated contexts for the individual authenticated tests. When authenticated mode is enabled, worker count is limited to one to minimize shared-account interference.
 
-Do **not** delete C# tests yet: full security/booking/role test parity, authenticated session reuse, cross-browser parity, and CI pipeline replacement are not done. The original workflow remains unchanged and is still the authoritative production smoke suite.
+`auth.setup.js` is excluded from normal public runs. Authentication state is sensitive: it is gitignored and must not be uploaded as CI artifacts.
+
+**Production caution:** The dedicated review account can still be modified by logout and negative mutation tests. Prefer local/UAT with isolated seeded data for full authenticated regression. The C# suite is retained until all remaining scenarios and browsers have parity.
+
+The separate JavaScript CI workflow currently runs safe public tests; it does not enable authenticated mode or replace production C# smoke.
