@@ -1,12 +1,12 @@
 const { defineConfig, devices } = require('@playwright/test');
 
 const authenticated = process.env.TEDILE_RUN_AUTHENTICATED === 'true';
-const targetURL = process.env.TEDILE_BASE_URL || 'https://tedile.in';
+const knownUAT = 'https://tedile-uat.onrender.com';
+const targetURL = process.env.TEDILE_BASE_URL || (authenticated ? knownUAT : 'https://tedile.in');
 if (authenticated) {
   const url = new URL(targetURL);
   if (!['https:', 'http:'].includes(url.protocol) ||
-      !process.env.TEDILE_UAT_BASE_URL ||
-      new URL(process.env.TEDILE_UAT_BASE_URL).origin !== url.origin ||
+      url.origin !== new URL(knownUAT).origin ||
       ['tedile.in', 'www.tedile.in'].includes(url.hostname)) {
     throw new Error('Authenticated automation requires TEDILE_BASE_URL and matching TEDILE_UAT_BASE_URL for an explicitly configured non-production UAT host.');
   }
