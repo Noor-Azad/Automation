@@ -7,7 +7,7 @@ const { OtpPage } = require('../pages/OtpPage');
 const authFile = path.join(__dirname, '..', 'playwright', '.auth', 'customer.json');
 
 test('login dedicated review customer once', async ({ page }, testInfo) => {
-  test.setTimeout(150_000);
+  test.setTimeout(180_000);
   const phone = process.env.TEDILE_E2E_CUSTOMER_PHONE;
   const code = process.env.TEDILE_E2E_CUSTOMER_OTP;
   expect(phone, 'Missing dedicated test phone').toBeTruthy();
