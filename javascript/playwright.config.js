@@ -14,25 +14,28 @@ if (authenticated && new URL(targetURL).origin !== new URL(productionSmoke ? pro
 const names = (process.env.TEDILE_BROWSERS || 'chromium').split(',').map(s => s.trim()).filter(Boolean);
 const browsers = { chromium: devices['Desktop Chrome'], firefox: devices['Desktop Firefox'], webkit: devices['Desktop Safari'] };
 for (const name of names) if (!browsers[name]) throw new Error('Unknown browser: ' + name);
+const safeProductionFiles = [
+  '**/api/health.spec.js',
+  '**/api/provider-search.spec.js',
+  '**/public/legal.spec.js',
+  '**/public/welcome.spec.js',
+  '**/security/public-security.spec.js',
+  '**/security/public-provider-privacy.spec.js',
+  '**/security/cache-public.spec.js',
+  '**/security/search-robustness.spec.js',
+  '**/security/session-privacy.auth.spec.js',
+  '**/security/headers.auth.spec.js',
+  '**/customer/customer-session.auth.spec.js',
+  '**/customer/session.auth.spec.js',
+  '**/customer/service-discovery.auth.spec.js',
+  '**/customer/provider-profile.auth.spec.js',
+  '**/customer/navigation.auth.spec.js',
+  '**/customer/primary-sections.auth.spec.js',
+];
 const projectTests = names.map(name => ({
   name,
-  testIgnore: ['**/auth.setup.js',
-    ...(productionSmoke ? [
-      '**/booking-*.auth.spec.js',
-      '**/profile-validation.auth.spec.js',
-      '**/mass-assignment.auth.spec.js',
-      '**/customer-security.auth.spec.js',
-      '**/logout*.auth.spec.js',
-      '**/otp-*.auth.spec.js',
-      '**/csp-otp-regression.spec.js',
-      '**/missing-token.auth.spec.js',
-      '**/notifications.auth.spec.js',
-      '**/provider-status.auth.spec.js',
-      '**/admin-matrix.auth.spec.js',
-      '**/provider-admin-role.auth.spec.js',
-      '**/customer-provider-owner.auth.spec.js',
-    ] : []),
-  ],
+  ...(productionSmoke ? { testMatch: safeProductionFiles } : {}),
+  testIgnore: '**/auth.setup.js',
   use: { ...browsers[name] },
   ...(authenticated ? { dependencies: ['auth-setup'] } : {}),
 }));
