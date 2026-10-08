@@ -1,6 +1,6 @@
-# Tedile Playwright JavaScript migration (phase 1)
+# Tedile Playwright JavaScript migration
 
-This folder is the JavaScript + `@playwright/test` equivalent of the initial C# Playwright + NUnit public UI and API tests.
+This folder introduces JavaScript Playwright Test alongside the existing C# Playwright + NUnit tests.
 
 ## Start
 ```bash
@@ -10,12 +10,15 @@ npx playwright install chromium
 npm test
 ```
 
-Override the base URL via `TEDILE_BASE_URL=http://127.0.0.1:5001 npm test`.
+Included so far: public welcome/legal, health/provider-search API, public security/anonymous access, and gated authenticated customer navigation/session checks.
 
-Included: WelcomeTests, LegalTests, HealthApiTests, ProviderSearchContractTests.
+## Authenticated tests (opt-in only)
 
-This is **not yet** a complete conversion of the C# automation project. Existing authenticated customer, booking, security, Firefox/WebKit, and CI tests remain in C# until individually ported and verified. Do not remove or disable those suites.
+Only use a dedicated approved test/review account. Set `TEDILE_E2E_CUSTOMER_PHONE` and `TEDILE_E2E_CUSTOMER_OTP` outside source control and set `TEDILE_RUN_AUTHENTICATED=true` to enable. These tests are serial within their files and create OTP requests, which are rate-limited. Never run them against an ordinary user or uncontrolled production account. They skip by default.
 
-No real OTP, secret, or production-data mutation is included in these tests. Prefer local/UAT for any test that creates users or bookings.
+Example (with environment variables already set):
+```bash
+TEDILE_RUN_AUTHENTICATED=true npx playwright test tests/customer --workers=1
+```
 
-This branch intentionally does not modify the existing CI workflows, so it cannot disrupt the current production smoke automation.
+Do **not** delete C# tests yet: full security/booking/role test parity, authenticated session reuse, cross-browser parity, and CI pipeline replacement are not done. The original workflow remains unchanged and is still the authoritative production smoke suite.
