@@ -1,0 +1,46 @@
+name: Tedile UAT Authenticated Playwright
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tedile-uat-authenticated
+  cancel-in-progress: false
+jobs:
+  authenticated-uat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: javascript
+    env:
+      TEDILE_BASE_URL: https://tedile-uat.onrender.com
+      TEDILE_RUN_AUTHENTICATED: 'true'
+      TEDILE_E2E_CUSTOMER_PHONE: ${{ secrets.TEDILE_UAT_CUSTOMER_PHONE }}
+      TEDILE_E2E_CUSTOMER_OTP: ${{ secrets.TEDILE_UAT_CUSTOMER_OTP }}
+    steps:
+      - name: Check out migration branch (not Test-Main)
+        uses: actions/checkout@v4
+        with:
+          ref: migration/playwright-javascript-phase1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm dedicated UAT credentials configured
+        run: |
+          test -n "$TEDILE_E2E_CUSTOMER_PHONE" || { echo 'Missing TEDILE_UAT_CUSTOMER_PHONE secret'; exit 1; }
+          test -n "$TEDILE_E2E_CUSTOMER_OTP" || { echo 'Missing TEDILE_UAT_CUSTOMER_OTP secret'; exit 1; }
+      - name: Install JS dependencies
+        run: npm install
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run UAT authenticated Playwright tests
+        run: npx playwright test --project=chromium
+      - name: Upload HTML test report only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uat-authenticated-report
+          path: javascript/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
