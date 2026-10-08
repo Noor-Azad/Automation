@@ -1,6 +1,16 @@
 const { defineConfig, devices } = require('@playwright/test');
 
 const authenticated = process.env.TEDILE_RUN_AUTHENTICATED === 'true';
+const targetURL = process.env.TEDILE_BASE_URL || 'https://tedile.in';
+if (authenticated) {
+  const url = new URL(targetURL);
+  if (!['https:', 'http:'].includes(url.protocol) ||
+      !process.env.TEDILE_UAT_BASE_URL ||
+      new URL(process.env.TEDILE_UAT_BASE_URL).origin !== url.origin ||
+      ['tedile.in', 'www.tedile.in'].includes(url.hostname)) {
+    throw new Error('Authenticated automation requires TEDILE_BASE_URL and matching TEDILE_UAT_BASE_URL for an explicitly configured non-production UAT host.');
+  }
+}
 const browser = { ...devices['Desktop Chrome'] };
 const browserNames = (process.env.TEDILE_BROWSERS || 'chromium')
   .split(',').map(value => value.trim()).filter(Boolean);
@@ -29,7 +39,7 @@ module.exports = defineConfig({
   workers: authenticated ? 1 : (process.env.CI ? 2 : 4),
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: process.env.TEDILE_BASE_URL || 'https://tedile.in',
+    baseURL: targetURL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     actionTimeout: 10_000,
