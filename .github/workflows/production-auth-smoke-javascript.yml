@@ -20,10 +20,8 @@ jobs:
       TEDILE_E2E_CUSTOMER_PHONE: ${{ secrets.TEDILE_E2E_CUSTOMER_PHONE }}
       TEDILE_E2E_CUSTOMER_OTP: ${{ secrets.TEDILE_E2E_CUSTOMER_OTP }}
     steps:
-      - name: Checkout JavaScript migration branch
+      - name: Checkout merged JavaScript framework
         uses: actions/checkout@v4
-        with:
-          ref: migration/playwright-javascript-phase1
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
