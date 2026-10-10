@@ -1,174 +1,38 @@
-# Tedile Playwright Automation
+# Tedile JavaScript Playwright Automation
 
-End-to-end automation for **Tedile** using **C# + Microsoft Playwright + NUnit**.
+End-to-end browser, API and security regression coverage for **https://tedile.in** using **JavaScript + Playwright Test**.
 
-This repository intentionally replaces the previous Java/Selenium/TestNG proof-of-concept and its generated `target`, `test-output`, `allure-results`, and screenshot artifacts.
-
-## Architecture
-
-The framework follows the structure from the supplied C# automation reference screenshots, while adapting it to Playwright:
-
-```text
-Tedile.Automation.sln
-├── src/Tedile.Automation
-│   ├── Api                  # API clients
-│   ├── Configuration        # TestSettings + ConfigReader
-│   ├── Core                 # Playwright browser fixture + artifacts
-│   ├── Models               # DTOs
-│   ├── Pages                # Page Objects
-│   ├── TestData             # TestCaseSource / reusable test data
-│   └── Utilities            # Logging helpers
-├── tests/Tedile.Automation.Tests
-│   ├── Api                  # API validation
-│   ├── Customer             # Optional authenticated E2E flows
-│   ├── Public               # Public smoke/regression UI tests
-│   ├── BaseTest.cs          # Per-test context/page/trace lifecycle
-│   └── testsettings.json
-└── .github/workflows
-    └── playwright.yml       # CI pipeline
-```
-
-### Design principles carried over from the reference framework
-
-- central `BaseTest` lifecycle
-- reusable driver/browser fixture (Playwright browser fixture)
-- Page Object Model
-- central configuration with environment-variable overrides
-- reusable data provider
-- logging through NUnit TestContext
-- API layer separate from UI pages
-- execution artifacts (Playwright trace, screenshots/video when enabled)
-- CI execution and downloadable test results
-
-## Covered scenarios
-
-Public tests run without credentials:
-
-- Welcome page loads with customer login selected
-- Customer/provider persona switching
-- Invalid mobile-number validation without sending OTP
-- Terms and Privacy links
-- Terms, Privacy and Provider NDA pages
-- Copyright validation
-- Provider NDA Print / Save as PDF action invokes `window.print()`
-- `/health` API returns healthy Tedile status
-
-Authenticated customer tests are included but automatically skipped until a safe Tedile review/test account is configured:
-
-- OTP customer login
-- Customer dashboard load
-- Services → Home deterministic Back navigation
-- Account → Personal Information → Account deterministic Back navigation
-
-## Local setup
-
-Prerequisites:
-
-- .NET 8 SDK
-- PowerShell (`pwsh`) for the generated Playwright install script
+## Quick start
 
 ```bash
-dotnet restore Tedile.Automation.sln
-dotnet build Tedile.Automation.sln
-pwsh tests/Tedile.Automation.Tests/bin/Debug/net8.0/playwright.ps1 install
-
-dotnet test Tedile.Automation.sln
+cd javascript
+npm install
+npx playwright install chromium
+npx playwright test
 ```
 
-Run headed Chromium:
+The default suite runs public tests and skips tests that require the dedicated review account. CI validates the public suite with Chromium, Firefox and WebKit.
 
-```bash
-PLAYWRIGHT_HEADLESS=false PLAYWRIGHT_BROWSER=chromium dotnet test Tedile.Automation.sln
-```
+## Dedicated production review-account smoke
 
-Run WebKit to reproduce Safari/WebKit behavior:
-
-```bash
-PLAYWRIGHT_BROWSER=webkit dotnet test Tedile.Automation.sln
-```
-
-Run Firefox:
-
-```bash
-PLAYWRIGHT_BROWSER=firefox dotnet test Tedile.Automation.sln
-```
-
-## Configuration
-
-Defaults are in `tests/Tedile.Automation.Tests/testsettings.json` and can be overridden with environment variables:
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `TEDILE_BASE_URL` | `https://tedile.in` | Target environment |
-| `PLAYWRIGHT_BROWSER` | `chromium` | `chromium`, `firefox`, or `webkit` |
-| `PLAYWRIGHT_HEADLESS` | `true` | Headless/headed run |
-| `PLAYWRIGHT_SLOWMO_MS` | `0` | Debug slow motion |
-| `PLAYWRIGHT_TIMEOUT_MS` | `30000` | Playwright timeout |
-| `PLAYWRIGHT_TRACE` | `true` | Save trace ZIPs |
-| `PLAYWRIGHT_VIDEO` | `false` | Record video |
-| `TEDILE_E2E_CUSTOMER_PHONE` | blank | Optional review/test customer |
-| `TEDILE_E2E_CUSTOMER_OTP` | blank | Optional fixed review/test OTP |
-
-Never commit real OTPs, passwords, private keys or production secrets.
-
-## OTP strategy for automation
-
-Tedile production does **not** get an insecure OTP bypass.
-
-The framework uses the existing dedicated Tedile review/test-account path:
-
-1. CI reads the review/test phone and configured review OTP from GitHub Secrets.
-2. The first authenticated test session completes the real Tedile OTP screen once.
-3. Playwright saves the authenticated browser storage state outside CI artifacts in the OS temporary directory.
-4. Subsequent authenticated customer tests start from that saved state, so they do not repeat the OTP flow.
-
-This keeps production authentication intact while making the test suite fast and repeatable.
-
-The two CI secrets are:
+The manual workflow **Tedile Production JavaScript Auth Smoke** uses these GitHub secrets:
 
 - `TEDILE_E2E_CUSTOMER_PHONE`
 - `TEDILE_E2E_CUSTOMER_OTP`
 
-Use the same dedicated review account already configured in Tedile. Do not use a personal customer number and do not commit the values.
+Only an explicitly configured, reviewed allowlist of safe production tests runs. The `auth-setup` project establishes a session using Tedile's normal OTP verification, and each test uses an isolated browser context. Never upload the session state or place secrets in Git.
 
-## GitHub Actions
+Tests with booking/profile writes, logout, or repeated OTP attempts remain in `javascript/tests` for controlled isolated-environment execution. **Passing the production smoke does not certify those excluded cases.** The production config intentionally blocks broad authenticated execution.
 
-`.github/workflows/playwright.yml` runs on PRs and pushes to `Test-Main`.
+## Source layout
 
-The pipeline:
+- `javascript/tests/`: Playwright test specs and authentication setup
+- `javascript/pages/`: Page Object Model
+- `javascript/fixtures/`: isolated authenticated page fixtures
+- `javascript/utils/`: shared test utilities
+- `javascript/playwright.config.js`: browsers, environment restrictions, and test selection
+- `.github/workflows/playwright-javascript.yml`: JavaScript Chromium/Firefox/WebKit CI
+- `.github/workflows/production-auth-smoke-javascript.yml`: manual protected production smoke
+- `performance/k6/`: independent performance smoke
 
-1. restores .NET dependencies
-2. builds the solution
-3. installs Playwright Chromium
-4. runs NUnit + Playwright tests
-5. generates an HTML report and GitHub job summary directly from the VSTest TRX result
-6. uploads TRX, HTML report, summary, and Playwright trace artifacts
-
-To enable authenticated customer tests in CI, add these **GitHub repository secrets**:
-
-- `TEDILE_E2E_CUSTOMER_PHONE`
-- `TEDILE_E2E_CUSTOMER_OTP`
-
-Until those secrets exist, authenticated tests are reported as skipped rather than failing or sending OTPs to arbitrary phone numbers.
-
-## Debugging failures
-
-Traces are written under `artifacts/traces`.
-
-Open a trace locally with:
-
-```bash
-pwsh tests/Tedile.Automation.Tests/bin/Debug/net8.0/playwright.ps1 show-trace artifacts/traces/<trace>.zip
-```
-
-CI uploads the same trace files as downloadable GitHub Action artifacts.
-
-## Test reporting
-
-Every CI workflow generates:
-
-- `TestResults/test-report.html` — human-readable per-test report with pass/fail/skip, duration, and failure details
-- `TestResults/test-summary.md` — compact summary published directly in the GitHub Actions job summary
-- the original `.trx` file — the authoritative raw VSTest result
-
-The report generator reads the NUnit/VSTest `UnitTestResult outcome` values from the TRX file. A test can print `PASS` to the console or application log, but that message cannot change a failed NUnit assertion into a passed test in the report.
+The legacy C# / NUnit automation framework was retired from this branch after the JavaScript cutover. Historical source remains available in Git history.
